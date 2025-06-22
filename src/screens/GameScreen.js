@@ -1,0 +1,298 @@
+// GameScreen.js
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import DraggableWord from '../components/DraggableWord';
+import { 
+  clamp, 
+  getValidYPositions, 
+  findNearestNonOverlapping,
+  getBoundingConstraints
+} from '../utils/PositionUtils';
+import { 
+  generateSpawnPositions, 
+  generateSpawnOrder, 
+  createInitialPositions 
+} from '../utils/spawnUtils';
+import { LAYOUT, ANIMATION, WORD_LIST } from '../utils/constants';
+import { verifyOrder } from '../utils/verification';
+
+import Timer from '../components/Timer';
+import SubmitButton from '../components/SubmitButton';
+import HintButton from '../components/HintButton';
+
+import { evaluateWordPositions } from '../utils/verification';
+
+
+
+
+
+export default function GameScreen() {
+  const [wordPositions, setWordPositions] = useState([]);
+  const [spawnedWords, setSpawnedWords] = useState(0);
+  const [isSpawning, setIsSpawning] = useState(true);
+  const [showText, setShowText] = useState(false);
+  const textOpacity = useRef(new Animated.Value(0)).current;
+  const lastLockedMessageTime = useRef(0);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const [showLockedMessage, setShowLockedMessage] = useState(false);
+  const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
+
+  function updatePosition(index, newX, newY, boxSize) {
+    setWordPositions(currentPositions => {
+
+      const currentPos = currentPositions[index];
+      if (currentPos && 
+          Math.abs(currentPos.x - newX) < 1 && 
+          Math.abs(currentPos.y - newY) < 1) {
+        return currentPositions;
+      }
+
+      const newPositions = [...currentPositions];
+      const validYPositions = getValidYPositions(boxSize.height);
+      const constraints = getBoundingConstraints(boxSize);
+
+      const candidatePos = {
+        x: clamp(newX, constraints.minX, constraints.maxX),
+        y: newY,
+        width: boxSize.width,
+        height: boxSize.height,
+      };
+
+      const others = newPositions.filter((_, i) => i !== index);
+      const nonOverlapPos = findNearestNonOverlapping(candidatePos, boxSize, others, validYPositions);
+
+      newPositions[index] = {
+        x: nonOverlapPos.x,
+        y: nonOverlapPos.y,
+        width: boxSize.width,
+        height: boxSize.height,
+        rect: {
+          x: nonOverlapPos.x,
+          y: nonOverlapPos.y,
+          width: boxSize.width,
+          height: boxSize.height,
+        },
+        index: index,
+        word: WORD_LIST[index],
+      };
+
+
+      return newPositions;
+    });
+  }
+
+  function handleSpawnComplete(index, finalX, finalY, boxSize) {
+    updatePosition(index, finalX, finalY, boxSize);
+  }
+
+  useEffect(() => {
+    initializeGame();
+  }, []);
+
+  const initializeGame = () => {
+    const targetPositions = generateSpawnPositions();
+    const spawnOrder = generateSpawnOrder(WORD_LIST.length);
+    const initialPositions = createInitialPositions(targetPositions, spawnOrder);
+
+    setWordPositions(initialPositions);
+    setSpawnedWords(0);
+    setIsSpawning(true);
+    setShowText(false);
+    textOpacity.setValue(0);
+
+    startSpawning();
+  };
+
+  const startSpawning = () => {
+    const spawnInterval = setInterval(() => {
+      setSpawnedWords(current => {
+        const next = current + 1;
+        if (next >= WORD_LIST.length) {
+          clearInterval(spawnInterval);
+          setIsSpawning(false);
+
+          setHasStarted(true);
+          
+          setTimeout(() => {
+            setShowText(true);
+            Animated.timing(textOpacity, {
+              toValue: 1,
+              duration: ANIMATION.TEXT_FADE_DURATION,
+              useNativeDriver: true,
+            }).start();
+          }, ANIMATION.TEXT_FADE_DELAY);
+        }
+        return next;
+      });
+    }, ANIMATION.SPAWN_INTERVAL);
+
+    return () => clearInterval(spawnInterval);
+  };
+
+  const getSortedWords = () => {
+    return [...wordPositions]
+      .sort((a, b) => {
+        const rowA = Math.floor(a.y / LAYOUT.GRID_SIZE);
+        const rowB = Math.floor(b.y / LAYOUT.GRID_SIZE);
+        if (rowA === rowB) {
+          return a.x - b.x;
+        }
+        return rowA - rowB;
+      })
+      .map(p => p.word);
+  };
+
+  function handleSubmit() {
+    const userAnswer = getSortedWords();
+    const isCorrect = verifyOrder(userAnswer);
+    console.log('Submit pressed, user answer:', userAnswer);
+    console.log('Is correct:', isCorrect);
+
+    setWordPositions(prev => evaluateWordPositions(prev, WORD_LIST, LAYOUT));
+  
+    if (isCorrect) {
+      // TODO: navigate to results screen or show success
+    } else {
+      // TODO: show try again message or hint
+    }
+  }
+
+  function handleUnlock(index) {
+    setWordPositions(prevPositions => {
+      // Only update if the word is actually locked to prevent unnecessary updates
+      if (!prevPositions[index]?.locked) return prevPositions;
+      
+      return prevPositions.map((pos, i) => {
+        if (i === index) {
+          return {
+            ...pos,
+            locked: false
+          };
+        }
+        return pos;
+      });
+    });
+  }
+
+  //a message for users if they try to move a locked word.
+function triggerLockedMessage() {
+  const now = Date.now();
+
+  // Prevent message if it's shown or was shown less than 3s ago
+  if (showLockedMessage || now - lastLockedMessageTime.current < 3000) return;
+
+  lastLockedMessageTime.current = now;
+  setShowLockedMessage(true);
+  lockedMessageOpacity.setValue(0);
+
+  Animated.timing(lockedMessageOpacity, {
+    toValue: 1,
+    duration: 200,
+    useNativeDriver: true,
+  }).start(() => {
+    setTimeout(() => {
+      Animated.timing(lockedMessageOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setShowLockedMessage(false));
+    }, 1500); // Message visible duration
+  });
+}
+  
+
+  function handleHint() {
+    console.log('Hint button pressed');
+    // Show a hint or trigger hint logic
+  }
+
+  return (
+    <View style={styles.container}>
+      <Animated.Text style={[
+        styles.orderText,
+        { opacity: textOpacity }
+      ]}>
+        {getSortedWords().join(' ')}
+      </Animated.Text>
+
+      {wordPositions.length === WORD_LIST.length &&
+        WORD_LIST.map((word, index) => (
+          <DraggableWord
+            key={index}
+            word={word}
+            initialPosition={{ x: wordPositions[index].x, y: wordPositions[index].y }}
+            targetPosition={wordPositions[index].targetX !== undefined ? 
+              { x: wordPositions[index].targetX, y: wordPositions[index].targetY } : null}
+            shouldSpawn={wordPositions[index].spawnOrder < spawnedWords}
+            onDragEnd={(x, y, boxSize) => updatePosition(index, x, y, boxSize)}
+            onSpawnComplete={(finalX, finalY, boxSize) => handleSpawnComplete(index, finalX, finalY, boxSize)}
+            onUnlock={() => handleUnlock(index)}
+            isSpawning={isSpawning}
+            locked={wordPositions[index].locked}
+            onLockedAttempt={triggerLockedMessage}
+            adjacentToCorrect={wordPositions[index].adjacentToCorrect}
+          />
+        ))}
+
+
+      {showLockedMessage && (
+            <Animated.View 
+            pointerEvents="none"
+            style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
+              <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
+            </Animated.View>
+          )}
+      <View style={styles.bottomRow}>
+        <HintButton onPress={handleHint} />
+        <Timer start={hasStarted} />
+        <SubmitButton onPress={handleSubmit} />
+      </View>
+    </View>
+
+    
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f4f4f4',
+  },
+  orderText: {
+    marginTop: 0,
+    fontSize: 16,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center'
+  },
+  bottomRow: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  lockedMessageContainer: {
+    position: 'absolute',
+    top: '45%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  lockedMessageText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+});
