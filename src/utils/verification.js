@@ -13,25 +13,50 @@ export function evaluateWordPositions(positions, correctList, layout) {
     return rowA - rowB;
   });
 
+  const userAnswer = sorted.map(p => p.word);
+
+  // 1. Handle exact matches (green highlight + lock)
+  sorted.forEach((pos, i) => {
+    const correctWord = correctList[i];
+    const isCorrect = pos.word === correctWord;
+
+    updated[pos.index] = {
+      ...updated[pos.index],
+      locked: isCorrect,
+      isCorrect: isCorrect,
+      adjacentToCorrect: false // will override below if needed
+    };
+  });
+
+  // 2. Handle adjacency-based yellow highlights
   for (let i = 0; i < sorted.length - 1; i++) {
-    const w1 = sorted[i].word;
-    const w2 = sorted[i + 1].word;
+    const actualWordA = sorted[i].word;
+    const actualWordB = sorted[i + 1].word;
 
-    const correctIndex1 = correctList.indexOf(w1);
-    const correctIndex2 = correctList.indexOf(w2);
+    const matchIndex = correctList.findIndex((word, idx) =>
+      word === actualWordA &&
+      correctList[idx + 1] === actualWordB &&
+      !connectedPairs.some(([from, to]) =>
+        sorted[from].word === actualWordA && sorted[to].word === actualWordB)
+    );
 
-    if (correctIndex2 === correctIndex1 + 1) {
-      updated[sorted[i].index].adjacentToCorrect = true;
-      updated[sorted[i + 1].index].adjacentToCorrect = true;
+    if (matchIndex !== -1) {
+      // Only apply yellow if not already green (exact)
+      if (!updated[sorted[i].index].isCorrect) {
+        updated[sorted[i].index].adjacentToCorrect = true;
+      }
+      if (!updated[sorted[i + 1].index].isCorrect) {
+        updated[sorted[i + 1].index].adjacentToCorrect = true;
+      }
+
       connectedPairs.push([sorted[i].index, sorted[i + 1].index]);
-    } else {
-      updated[sorted[i].index].adjacentToCorrect = false;
-      updated[sorted[i + 1].index].adjacentToCorrect = false;
     }
   }
 
   return { updatedPositions: updated, connectedPairs };
 }
+
+
 
 
 export function verifyOrder(userOrder) {

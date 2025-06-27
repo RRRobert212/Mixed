@@ -40,7 +40,9 @@ export default function GameScreen() {
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
 
-  const [connections, setConnections] = useState([]);
+const [connections, setConnections] = useState([]);          // current frame's connections
+const [persistentConnections, setPersistentConnections] = useState([]); // ALL confirmed correct connections
+
 
   function updatePosition(index, newX, newY, boxSize) {
     setWordPositions(currentPositions => {
@@ -153,14 +155,35 @@ function handleSubmit() {
   const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, WORD_LIST, LAYOUT);
 
   setWordPositions(updatedPositions);
-  setConnections(connectedPairs); // <-- new state
+  setConnections(connectedPairs);
+
+setPersistentConnections(prev => {
+  // Create a Set of already claimed directions
+  const hasInbound = new Set(prev.map(pair => pair[1]));
+  const hasOutbound = new Set(prev.map(pair => pair[0]));
+
+  const newOnes = [];
+
+  for (const [from, to] of connectedPairs) {
+    if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+
+    // Prevent duplicate reverse pairs
+    if (prev.some(([a, b]) => a === from && b === to)) continue;
+
+    newOnes.push([from, to]);
+    hasOutbound.add(from);
+    hasInbound.add(to);
+  }
+
+  return [...prev, ...newOnes];
+});
+
 
   if (isCorrect) {
-    // show success
-  } else {
-    // hint
+    // handle win
   }
 }
+
 
   function handleUnlock(index) {
     setWordPositions(prevPositions => {
@@ -221,8 +244,8 @@ function triggerLockedMessage() {
       </Animated.Text>
 
       <ConnectionLines 
-  wordPositions={wordPositions} 
-  connections={connections}
+        wordPositions={wordPositions}
+        connections={persistentConnections}
       />
 
       {wordPositions.length === WORD_LIST.length &&
