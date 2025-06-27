@@ -2,43 +2,37 @@
 
 import { WORD_LIST } from './constants';
 
-export function evaluateWordPositions(currentPositions, targetList, layout) {
-  const sorted = [...currentPositions].sort((a, b) => {
+export function evaluateWordPositions(positions, correctList, layout) {
+  const updated = [...positions];
+  const connectedPairs = [];
+
+  const sorted = [...positions].sort((a, b) => {
     const rowA = Math.floor(a.y / layout.GRID_SIZE);
     const rowB = Math.floor(b.y / layout.GRID_SIZE);
-    return rowA === rowB ? a.x - b.x : rowA - rowB;
+    if (rowA === rowB) return a.x - b.x;
+    return rowA - rowB;
   });
 
-  const newPositions = currentPositions.map((pos, i) => {
-    const sortedIndex = sorted.findIndex(
-      p => p.word === pos.word && p.index === pos.index
-    );
-    const isCorrectlyPlaced = sortedIndex !== -1 && targetList[sortedIndex] === pos.word;
-
-    return {
-      ...pos,
-      locked: isCorrectlyPlaced,
-      adjacentToCorrect: false, // default to false for now
-    };
-  });
-
-  // Set adjacentToCorrect flags
   for (let i = 0; i < sorted.length - 1; i++) {
-    const curr = sorted[i];
-    const next = sorted[i + 1];
+    const w1 = sorted[i].word;
+    const w2 = sorted[i + 1].word;
 
-    const correctIndex = targetList.indexOf(curr.word);
-    if (correctIndex !== -1 && targetList[correctIndex + 1] === next.word) {
-      // find them in newPositions and set adjacentToCorrect to true
-      const i1 = newPositions.findIndex(p => p.word === curr.word && p.index === curr.index);
-      const i2 = newPositions.findIndex(p => p.word === next.word && p.index === next.index);
-      if (i1 !== -1) newPositions[i1].adjacentToCorrect = true;
-      if (i2 !== -1) newPositions[i2].adjacentToCorrect = true;
+    const correctIndex1 = correctList.indexOf(w1);
+    const correctIndex2 = correctList.indexOf(w2);
+
+    if (correctIndex2 === correctIndex1 + 1) {
+      updated[sorted[i].index].adjacentToCorrect = true;
+      updated[sorted[i + 1].index].adjacentToCorrect = true;
+      connectedPairs.push([sorted[i].index, sorted[i + 1].index]);
+    } else {
+      updated[sorted[i].index].adjacentToCorrect = false;
+      updated[sorted[i + 1].index].adjacentToCorrect = false;
     }
   }
 
-  return newPositions;
+  return { updatedPositions: updated, connectedPairs };
 }
+
 
 export function verifyOrder(userOrder) {
   return arraysEqual(userOrder, WORD_LIST);

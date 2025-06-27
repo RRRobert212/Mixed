@@ -22,6 +22,8 @@ import HintButton from '../components/HintButton';
 
 import { evaluateWordPositions } from '../utils/verification';
 
+import ConnectionLines from '../components/ConnectionLines';
+
 
 
 
@@ -37,6 +39,8 @@ export default function GameScreen() {
 
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
+
+  const [connections, setConnections] = useState([]);
 
   function updatePosition(index, newX, newY, boxSize) {
     setWordPositions(currentPositions => {
@@ -143,20 +147,20 @@ export default function GameScreen() {
       .map(p => p.word);
   };
 
-  function handleSubmit() {
-    const userAnswer = getSortedWords();
-    const isCorrect = verifyOrder(userAnswer);
-    console.log('Submit pressed, user answer:', userAnswer);
-    console.log('Is correct:', isCorrect);
+function handleSubmit() {
+  const userAnswer = getSortedWords();
+  const isCorrect = verifyOrder(userAnswer);
+  const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, WORD_LIST, LAYOUT);
 
-    setWordPositions(prev => evaluateWordPositions(prev, WORD_LIST, LAYOUT));
-  
-    if (isCorrect) {
-      // TODO: navigate to results screen or show success
-    } else {
-      // TODO: show try again message or hint
-    }
+  setWordPositions(updatedPositions);
+  setConnections(connectedPairs); // <-- new state
+
+  if (isCorrect) {
+    // show success
+  } else {
+    // hint
   }
+}
 
   function handleUnlock(index) {
     setWordPositions(prevPositions => {
@@ -215,6 +219,11 @@ function triggerLockedMessage() {
       ]}>
         {getSortedWords().join(' ')}
       </Animated.Text>
+
+      <ConnectionLines 
+  wordPositions={wordPositions} 
+  connections={connections}
+      />
 
       {wordPositions.length === WORD_LIST.length &&
         WORD_LIST.map((word, index) => (

@@ -26,6 +26,6 @@ export const ANIMATION = {
 };
 
 export const WORD_LIST = [
-  'we', 'knew', 'the', 'world', 'would', 'not', 'be', 'the', 
-  'same', 'few', 'people', 'laughed', 'few', 'people', 'cried'
+'If', 'the', 'brain', 'were', 'so', 'simple', 'we', 'could', 'understand', 'it,', 'we', 'would', 'be', 'so', 'simple', 'we', 'couldn\'t.'
 ];
+
