@@ -1,0 +1,38 @@
+categories/puzzle packs: 
+Lord of the rings
+The Beatles songs
+Sci-fi
+Star wars
+Criterion films
+Shakespeare
+80s songs
+
+
+on the bottom of the screen display the current order of the phrase based on the position of the words. It updates when users move the words around.
+There is also a submit button so users will be able to read their completed phrase and ensure it's right before they hit submit.
+
+BTW, I think this game might be pretty easy so I think we make them go for 100% completion and score based on time, add time penalty for wrong submission.
+
+Divide it into lines where it goes left to right unless you put a word on a new line 
+and lines are defined as like starting below the bottom of the topmost word on the above line
+
+local order correct - turns yellow. i.e. if a word to the right or left of a word is correct then both of those get highlighted. a string in between them perhaps.
+
+pulse for lock animation. is pulse a buult in effect? or do we just use scale?
+
+
+make the end CELEBRATION more exciting - also for the slow people or tired (me)give them a word aleady or hint the fast ones don't need it 
+
+Problem with local highlighting, 'with a busted face I arrive like a fairy' VS 'I arrive like a fairy with a busted face' one of them gets 
+highlighted all yellow so it like seems like it's in the right order, but there is a break. Problem due to both bwords being highlighted when local order is correct.
+
+BADGES: if the words are too thin the badges don't work. Also if the the badge is too wide I think on a small word, then it get's displayed like vertically. 
+Also badges don't persist after moving.
+
+ARROWS: arrows are a little weird with repeated words but I don't know if this is really fixable. Not a pressing issue.
+
+CELEBRATION: needs info on the quote. Author and year ( or century?) if possible. Building actual dataset of quotes tied to this info is a big task.
+
+change bottom away from timer and into number of guesses.
+
+Hard mode - no punctuation? Extremely hard mode - no punctuation no feedback or no feedback except green? or just no feedback but yes punctuation?

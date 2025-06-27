@@ -264,6 +264,7 @@ function triggerLockedMessage() {
             locked={wordPositions[index].locked}
             onLockedAttempt={triggerLockedMessage}
             adjacentToCorrect={wordPositions[index].adjacentToCorrect}
+            correctIndexTag={wordPositions[index].correctIndexTag}
           />
         ))}
 

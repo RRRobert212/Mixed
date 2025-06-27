@@ -26,6 +26,7 @@ export default function DraggableWord({
   locked = false,
   onLockedAttempt,
   adjacentToCorrect = false,
+  correctIndexTag,
 
 
 }) {
@@ -312,7 +313,12 @@ export default function DraggableWord({
         const { width, height } = event.nativeEvent.layout;
         boxSizeRef.current = { width, height };
       }}
+      
     >
+      {correctIndexTag != null && (
+        <Text style={styles.indexBadge}>{correctIndexTag}</Text>
+      )}
+
       <Text style={styles.wordText}>{word}</Text>
     </Animated.View>
   );
@@ -346,4 +352,18 @@ const styles = StyleSheet.create({
   adjacentWord: {
   backgroundColor: '#FFEB3B', // Material yellow
 },
+indexBadge: {
+  position: 'absolute',
+  top: -8,
+  right: -8,
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  borderRadius: 10,
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  fontSize: 10,
+  fontWeight: 'bold',
+  overflow: 'hidden',
+},
+
 });
