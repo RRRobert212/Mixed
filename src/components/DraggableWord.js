@@ -359,11 +359,18 @@ indexBadge: {
   backgroundColor: '#4CAF50',
   color: 'white',
   borderRadius: 10,
-  paddingHorizontal: 6,
-  paddingVertical: 2,
+  paddingHorizontal: 4,
   fontSize: 10,
   fontWeight: 'bold',
   overflow: 'hidden',
+  zIndex: 10,
+  minWidth: 24,
+  height: 16,                 // ✅ Set fixed height
+  lineHeight: 16,             // ✅ Match height exactly
+  textAlign: 'center',
+  includeFontPadding: false,  // ✅ Prevent extra vertical padding on Android
+  textAlignVertical: 'center',// ✅ Android vertical center (has no effect on iOS)
 },
+
 
 });
