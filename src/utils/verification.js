@@ -20,13 +20,13 @@ export function evaluateWordPositions(positions, correctList, layout) {
     const correctWord = correctList[i];
     const isCorrect = pos.word === correctWord;
 
-    const wasAlreadyCorrect = positions[pos.index]?.isCorrect;
+    const previous = positions[pos.index];
 
     updated[pos.index] = {
       ...updated[pos.index],
-      locked: isCorrect || wasAlreadyCorrect,
-      isCorrect: isCorrect || wasAlreadyCorrect,
-      correctIndexTag: (isCorrect ? i + 1 : positions[pos.index]?.correctIndexTag) ?? null,
+      locked: isCorrect,                        // 🔁 updated based on current position only
+      isCorrect: isCorrect,                    // 🔁 not persistent anymore
+      correctIndexTag: previous?.correctIndexTag ?? (isCorrect ? i + 1 : null), // ✅ persist tag only
       adjacentToCorrect: false
     };
   });

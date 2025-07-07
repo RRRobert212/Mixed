@@ -40,8 +40,13 @@ export default function GameScreen() {
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
 
-const [connections, setConnections] = useState([]);          // current frame's connections
-const [persistentConnections, setPersistentConnections] = useState([]); // ALL confirmed correct connections
+  const [connections, setConnections] = useState([]);          // current frame's connections
+  const [persistentConnections, setPersistentConnections] = useState([]); // ALL confirmed correct connections
+
+  const MAX_SUBMITS = 6;
+  const [remainingSubmits, setRemainingSubmits] = useState(MAX_SUBMITS);
+  const MAX_HINTS = 5;
+  const [remainingHints, setRemainingHints] = useState(MAX_HINTS);
 
 
   function updatePosition(index, newX, newY, boxSize) {
@@ -152,40 +157,69 @@ const [persistentConnections, setPersistentConnections] = useState([]); // ALL c
   };
 
 function handleSubmit() {
+
+  if (remainingSubmits <= 0){
+    //alert message saying game over / game over logic
+  }
+
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer);
+
+  setRemainingSubmits(prev => {
+  const next = prev - 1;
+
+
+    return next;
+  });
+
+  if (isCorrect) {
+    //alert message saying game one
+    console.log('correreeect!')
+  }
+  else {console.log('WRONG')}
+}
+
+  function handleHint() {
+  if (remainingHints <= 0) {
+    
+    //alert message saying no hints remaining
+    return
+  }
+    
+    
+
+  const userAnswer = getSortedWords();
   const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, WORD_LIST, LAYOUT);
 
   setWordPositions(updatedPositions);
   setConnections(connectedPairs);
 
-setPersistentConnections(prev => {
-  // Create a Set of already claimed directions
-  const hasInbound = new Set(prev.map(pair => pair[1]));
-  const hasOutbound = new Set(prev.map(pair => pair[0]));
+  setPersistentConnections(prev => {
+    const hasInbound = new Set(prev.map(pair => pair[1]));
+    const hasOutbound = new Set(prev.map(pair => pair[0]));
+    const newOnes = [];
 
-  const newOnes = [];
+    for (const [from, to] of connectedPairs) {
+      if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+      if (prev.some(([a, b]) => a === from && b === to)) continue;
 
-  for (const [from, to] of connectedPairs) {
-    if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+      newOnes.push([from, to]);
+      hasOutbound.add(from);
+      hasInbound.add(to);
+    }
 
-    // Prevent duplicate reverse pairs
-    if (prev.some(([a, b]) => a === from && b === to)) continue;
+    return [...prev, ...newOnes];
+  });
 
-    newOnes.push([from, to]);
-    hasOutbound.add(from);
-    hasInbound.add(to);
+  // Decrement Hint count
+  setRemainingHints(prev => {
+    const next = prev - 1;
+
+
+    return next;
+  });
+
   }
-
-  return [...prev, ...newOnes];
-});
-
-
-  if (isCorrect) {
-    // handle win
-  }
-}
-
 
   function handleUnlock(index) {
     setWordPositions(prevPositions => {
@@ -231,10 +265,6 @@ function triggerLockedMessage() {
 }
   
 
-  function handleHint() {
-    console.log('Hint button pressed');
-    // Show a hint or trigger hint logic
-  }
 
   return (
     <View style={styles.container}>
@@ -280,7 +310,9 @@ function triggerLockedMessage() {
           )}
       <View style={styles.bottomRow}>
         <HintButton onPress={handleHint} />
-        <Timer start={hasStarted} />
+        {/*    <Timer start={hasStarted} />  TIMER ELEMENT, REPLACED WITH Hints/guesses (GAME DESIGN CHOICE)*/}
+       {/* <Text style={styles.hintCounter}> Hints Remaining: {remainingHints} </Text> */}
+        <Text style={styles.submitCounter}> Guesses Remaining: {remainingSubmits} </Text>
         <SubmitButton onPress={handleSubmit} />
       </View>
     </View>
@@ -329,5 +361,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  hintCounter: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#333',
+  },
+  submitCounter: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#333',
   },
 });

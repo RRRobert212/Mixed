@@ -26,6 +26,6 @@ export const ANIMATION = {
 };
 
 export const WORD_LIST = [
-'I', 'the', 'brain', 'il', 'so', 'simple', 'we', 'could', 'understand', 'it,', 'we', 'would', 'be', 'so', 'simple', 'we', 'couldn\'t.'
+'If', 'the', 'brain', 'were', 'so', 'simple', 'we', 'could', 'understand', 'it,', 'we', 'would', 'be', 'so', 'simple', 'we', 'couldn\'t.'
 ];
 
