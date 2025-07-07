@@ -68,7 +68,10 @@ const [persistentConnections, setPersistentConnections] = useState([]); // ALL c
       const others = newPositions.filter((_, i) => i !== index);
       const nonOverlapPos = findNearestNonOverlapping(candidatePos, boxSize, others, validYPositions);
 
+      const prev = currentPositions[index];
+
       newPositions[index] = {
+        ...prev, // ✅ Preserve previous metadata like locked, correctIndexTag
         x: nonOverlapPos.x,
         y: nonOverlapPos.y,
         width: boxSize.width,
@@ -79,9 +82,8 @@ const [persistentConnections, setPersistentConnections] = useState([]); // ALL c
           width: boxSize.width,
           height: boxSize.height,
         },
-        index: index,
-        word: WORD_LIST[index],
       };
+
 
 
       return newPositions;

@@ -20,12 +20,14 @@ export function evaluateWordPositions(positions, correctList, layout) {
     const correctWord = correctList[i];
     const isCorrect = pos.word === correctWord;
 
+    const wasAlreadyCorrect = positions[pos.index]?.isCorrect;
+
     updated[pos.index] = {
       ...updated[pos.index],
-      locked: isCorrect,
-      isCorrect: isCorrect,
-      correctIndexTag: isCorrect ? i + 1 : null,
-      adjacentToCorrect: false // will override below if needed
+      locked: isCorrect || wasAlreadyCorrect,
+      isCorrect: isCorrect || wasAlreadyCorrect,
+      correctIndexTag: (isCorrect ? i + 1 : positions[pos.index]?.correctIndexTag) ?? null,
+      adjacentToCorrect: false
     };
   });
 
