@@ -371,18 +371,18 @@ function triggerHintMessage() {
       </View>
 
     {hasWon && finalStats && (
-      <VictoryScreen
-        fullQuote={finalStats.fullQuote}
-        hintsUsed={finalStats.hintsUsed}
-        guessesUsed={finalStats.guessesUsed}
-        performance={finalStats.performance}
-        onClose={() => {
-          setHasWon(false);
-          setFinalStats(null);
-          initializeGame();
-        }}
-      />
-    )}
+    <VictoryScreen
+      fullQuote={finalStats.fullQuote}
+      hintsUsed={finalStats.hintsUsed}
+      guessesUsed={finalStats.guessesUsed}
+      performance={finalStats.performance}
+      onClose={() => {
+        setHasWon(false);
+        setFinalStats(null);
+        initializeGame();
+      }}
+    />
+  )}
 
     </View>
 

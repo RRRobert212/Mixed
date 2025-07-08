@@ -6,6 +6,7 @@ const { width } = Dimensions.get('window');
 export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, performance, onClose }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
+  const overlayFadeAnim = useRef(new Animated.Value(0)).current; // Add this line
   const [shouldShowContent, setShouldShowContent] = useState(false);
 
   useEffect(() => {
@@ -15,6 +16,11 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
     // Start animation after a brief delay to ensure content is rendered
     const animationTimeout = setTimeout(() => {
       Animated.parallel([
+        Animated.timing(overlayFadeAnim, { // Add this animation
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 400,
@@ -36,11 +42,12 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
   }
 
   return (
-    <Animated.View style={[styles.fullscreen, { opacity: fadeAnim }]}>
-      <View style={styles.overlay} />
+    <View style={styles.fullscreen}>
+      <Animated.View style={[styles.overlay, { opacity: overlayFadeAnim }]} />
       <Animated.View style={[
         styles.container, 
         { 
+          opacity: fadeAnim,
           transform: [{ scale: scaleAnim }] 
         }
       ]}>
@@ -52,9 +59,10 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
           <Text style={styles.buttonText}>Play Again</Text>
         </TouchableOpacity>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
   fullscreen: {
     position: 'absolute',
