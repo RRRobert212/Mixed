@@ -26,7 +26,7 @@ export const ANIMATION = {
 };
 
 export const WORD_LIST = [
-'If', 'the', 'brain', 'were', 'so', 'simple', 'we', 'could', 'understand', 'it,', 'we', 'would', 'be', 'so', 'simple', 'we', 'couldn\'t.'
+'abandon', 'all', 'hope,' 
 ];
 
 //difficulty changes with these, max guesses and hints
