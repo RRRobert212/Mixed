@@ -1,22 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // ✅ Add this
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, performance, onClose }) {
+export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, performance }) {
+  const navigation = useNavigation(); // ✅ Hook into navigation
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
-  const overlayFadeAnim = useRef(new Animated.Value(0)).current; // Add this line
+  const overlayFadeAnim = useRef(new Animated.Value(0)).current;
   const [shouldShowContent, setShouldShowContent] = useState(false);
 
   useEffect(() => {
-    // Show content immediately when component mounts
     setShouldShowContent(true);
-    
-    // Start animation after a brief delay to ensure content is rendered
+
     const animationTimeout = setTimeout(() => {
       Animated.parallel([
-        Animated.timing(overlayFadeAnim, { // Add this animation
+        Animated.timing(overlayFadeAnim, {
           toValue: 1,
           duration: 400,
           useNativeDriver: true,
@@ -37,31 +37,35 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
     return () => clearTimeout(animationTimeout);
   }, []);
 
-  if (!shouldShowContent) {
-    return null; // Don't render anything until ready
-  }
+  if (!shouldShowContent) return null;
+
+  const handleGoHome = () => {
+    navigation.navigate('Home'); // ✅ Adjust route name as needed
+  };
 
   return (
     <View style={styles.fullscreen}>
       <Animated.View style={[styles.overlay, { opacity: overlayFadeAnim }]} />
       <Animated.View style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           opacity: fadeAnim,
-          transform: [{ scale: scaleAnim }] 
+          transform: [{ scale: scaleAnim }]
         }
       ]}>
         <Text style={styles.title}>{performance}</Text>
         <Text style={styles.quote}>"{fullQuote}"</Text>
         <Text style={styles.stats}>Guesses: {guessesUsed}</Text>
         <Text style={styles.stats}>Hints Used: {hintsUsed}</Text>
-        <TouchableOpacity style={styles.button} onPress={onClose}>
-          <Text style={styles.buttonText}>Play Again</Text>
+
+        <TouchableOpacity style={styles.button} onPress={handleGoHome}>
+          <Text style={styles.buttonText}>Back to Home</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   fullscreen: {
@@ -92,13 +96,14 @@ const styles = StyleSheet.create({
   },
   quote: {
     fontSize: 18,
-    fontStyle: 'italic',
+    fontFamily: 'serif',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: 'center',
   },
   stats: {
-    fontSize: 16,
+    fontSize: 22,
+    fontWeight: 'bold',
     color: '#555',
     marginBottom: 5,
   },
