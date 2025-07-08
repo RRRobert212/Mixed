@@ -36,3 +36,22 @@ CELEBRATION: needs info on the quote. Author and year ( or century?) if possible
 change bottom away from timer and into number of guesses.
 
 Hard mode - no punctuation? Extremely hard mode - no punctuation no feedback or no feedback except green? or just no feedback but yes punctuation?
+
+NYT games have the thing where they tell you like how you did after so you can report it. E.g. the crossword is timed, connections gives you the colors of your guesses.
+This should have something like that. I think limiting both guesses and time is a way to do it. Yeah I think time is good. But, that sorta forces you to spam guesses
+to get a quick time. oooh, what if hints are what provide feedback and guesses are just guesses. So hints tell you when things are in the right order, submit just submits.
+So you actually have unlimited guesses but it does track it and then you get your like, solved in 5:20, 3 hints, 2 guesses'
+
+public domain books:
+
+    Jane Austen: Pride and Prejudice
+    Henri Bergson: Laughter: An Essay on the Meaning of Comic
+    Charles Dickens: A Christmas Carol
+    Fyodor Dostoyevsky: Notes from the Underground
+    Horace: The Works of Horace
+    James Joyce: Ulysses
+    Franz Kafka: Metamorphosis
+    Marcel Proust: Remembrance of Things Past: Swann’s Way
+    Oscar Wilde: The Picture of Dorian Gray
+
+https://en.wikipedia.org/wiki/2022_in_public_domain

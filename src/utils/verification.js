@@ -24,9 +24,9 @@ export function evaluateWordPositions(positions, correctList, layout) {
 
     updated[pos.index] = {
       ...updated[pos.index],
-      locked: isCorrect,                        // 🔁 updated based on current position only
-      isCorrect: isCorrect,                    // 🔁 not persistent anymore
-      correctIndexTag: previous?.correctIndexTag ?? (isCorrect ? i + 1 : null), // ✅ persist tag only
+      locked: isCorrect,  
+      isCorrect: isCorrect,                 
+      correctIndexTag: previous?.correctIndexTag ?? (isCorrect ? i + 1 : null),
       adjacentToCorrect: false
     };
   });

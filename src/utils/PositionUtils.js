@@ -5,6 +5,13 @@ export function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * determines if two objects which have height and width are overlapping
+ * 
+ * @param {any} r1 
+ * @param {any} r2 
+ * @returns True if overlapping False otherwise
+ */
 export function rectsOverlap(r1, r2) {
   return !(
     r1.x + r1.width <= r2.x ||
