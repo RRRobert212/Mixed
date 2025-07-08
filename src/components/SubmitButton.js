@@ -3,10 +3,10 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { BUTTON_WIDTH } from '../utils/constants';
 
-export default function SubmitButton({ onPress }) {
+export default function SubmitButton({ onPress, remainingSubmits }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>Submit</Text>
+      <Text style={styles.buttonText}>Submit ({remainingSubmits})</Text>
     </TouchableOpacity>
   );
 }
@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
   },
 });

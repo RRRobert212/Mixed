@@ -24,6 +24,8 @@ import { evaluateWordPositions } from '../utils/verification';
 
 import ConnectionLines from '../components/ConnectionLines';
 
+import { MAX_SUBMITS, MAX_HINTS } from '../utils/constants';
+
 
 
 
@@ -40,12 +42,14 @@ export default function GameScreen() {
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
 
+  const [showHintMessage, setShowHintMessage] = useState(false);
+  const hintMessageOpacity = useRef(new Animated.Value(0)).current;
+  const lastHintMessageTime = useRef(0);
+
   const [connections, setConnections] = useState([]);          // current frame's connections
   const [persistentConnections, setPersistentConnections] = useState([]); // ALL confirmed correct connections
 
-  const MAX_SUBMITS = 6;
   const [remainingSubmits, setRemainingSubmits] = useState(MAX_SUBMITS);
-  const MAX_HINTS = 5;
   const [remainingHints, setRemainingHints] = useState(MAX_HINTS);
 
 
@@ -159,7 +163,9 @@ export default function GameScreen() {
 function handleSubmit() {
 
   if (remainingSubmits <= 0){
+    
     //alert message saying game over / game over logic
+    return
   }
 
   const userAnswer = getSortedWords();
@@ -183,6 +189,7 @@ function handleSubmit() {
   if (remainingHints <= 0) {
     
     //alert message saying no hints remaining
+    triggerHintMessage();
     return
   }
     
@@ -263,6 +270,31 @@ function triggerLockedMessage() {
     }, 1500); // Message visible duration
   });
 }
+
+function triggerHintMessage() {
+  const now = Date.now();
+
+  if (showHintMessage || now - lastHintMessageTime.current < 3000) return;
+
+  lastHintMessageTime.current = now;
+  setShowHintMessage(true);
+  hintMessageOpacity.setValue(0);
+
+  Animated.timing(hintMessageOpacity, {
+    toValue: 1,
+    duration: 200,
+    useNativeDriver: true,
+  }).start(() => {
+    setTimeout(() => {
+      Animated.timing(hintMessageOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setShowHintMessage(false));
+    }, 1500); // Visible duration
+  });
+}
+
   
 
 
@@ -308,12 +340,18 @@ function triggerLockedMessage() {
               <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
             </Animated.View>
           )}
+      {showHintMessage && (
+            <Animated.View 
+              pointerEvents="none"
+              style={[styles.lockedMessageContainer, { opacity: hintMessageOpacity }]}>
+              <Text style={styles.lockedMessageText}>No hints remaining</Text>
+            </Animated.View>
+          )}
       <View style={styles.bottomRow}>
-        <HintButton onPress={handleHint} />
+        <HintButton onPress={handleHint} remainingHints={remainingHints} />
         {/*    <Timer start={hasStarted} />  TIMER ELEMENT, REPLACED WITH Hints/guesses (GAME DESIGN CHOICE)*/}
-       {/* <Text style={styles.hintCounter}> Hints Remaining: {remainingHints} </Text> */}
-        <Text style={styles.submitCounter}> Guesses Remaining: {remainingSubmits} </Text>
-        <SubmitButton onPress={handleSubmit} />
+
+        <SubmitButton onPress={handleSubmit} remainingSubmits = {remainingSubmits} />
       </View>
     </View>
 
@@ -338,9 +376,9 @@ const styles = StyleSheet.create({
   },
   bottomRow: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: 65,
+    left: 30,
+    right: 30,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -361,15 +399,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  hintCounter: {
-  fontSize: 16,
-  fontWeight: 'bold',
-  color: '#333',
-  },
-  submitCounter: {
-  fontSize: 16,
-  fontWeight: 'bold',
-  color: '#333',
   },
 });

@@ -3,10 +3,11 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { BUTTON_WIDTH } from '../utils/constants';
 
-export default function HintButton({ onPress }) {
+
+export default function HintButton({ onPress, remainingHints }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>Hint</Text>
+      <Text style={styles.buttonText}>Hint ({remainingHints}) </Text>
     </TouchableOpacity>
   );
 }
@@ -23,6 +24,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
   },
 });
