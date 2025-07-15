@@ -26,6 +26,8 @@ import ConnectionLines from '../components/ConnectionLines';
 
 import { MAX_SUBMITS, MAX_HINTS } from '../utils/constants';
 
+import VictoryScreen from '../screens/VictoryScreen';
+
 
 
 
@@ -51,6 +53,10 @@ export default function GameScreen() {
 
   const [remainingSubmits, setRemainingSubmits] = useState(MAX_SUBMITS);
   const [remainingHints, setRemainingHints] = useState(MAX_HINTS);
+
+  const [hasWon, setHasWon] = useState(false);
+  const [finalStats, setFinalStats] = useState(null);
+
 
 
   function updatePosition(index, newX, newY, boxSize) {
@@ -161,28 +167,40 @@ export default function GameScreen() {
   };
 
 function handleSubmit() {
-
-  if (remainingSubmits <= 0){
-    
-    //alert message saying game over / game over logic
-    return
+  if (remainingSubmits <= 0) {
+    // Optional: show game over screen
+    return;
   }
 
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer);
 
-  setRemainingSubmits(prev => {
-  const next = prev - 1;
-
-
-    return next;
-  });
+  setRemainingSubmits(prev => prev - 1);
 
   if (isCorrect) {
-    //alert message saying game one
-    console.log('correreeect!')
+    const hintsUsed = MAX_HINTS - remainingHints;
+    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+
+    const performance =
+      hintsUsed === 0 && guessesUsed === 1
+        ? 'Perfect!'
+        : hintsUsed <= 1 && guessesUsed <= 2
+        ? 'Excellent!'
+        : hintsUsed <= 2 && guessesUsed <= 3
+        ? 'Good!'
+        : 'A win is a win...';
+
+    setFinalStats({
+      fullQuote: userAnswer.join(' '),
+      hintsUsed,
+      guessesUsed,
+      performance,
+    });
+
+    setHasWon(true);
+  } else {
+    console.log('WRONG');
   }
-  else {console.log('WRONG')}
 }
 
   function handleHint() {
@@ -295,8 +313,6 @@ function triggerHintMessage() {
   });
 }
 
-  
-
 
   return (
     <View style={styles.container}>
@@ -353,6 +369,21 @@ function triggerHintMessage() {
 
         <SubmitButton onPress={handleSubmit} remainingSubmits = {remainingSubmits} />
       </View>
+
+    {hasWon && finalStats && (
+    <VictoryScreen
+      fullQuote={finalStats.fullQuote}
+      hintsUsed={finalStats.hintsUsed}
+      guessesUsed={finalStats.guessesUsed}
+      performance={finalStats.performance}
+      onClose={() => {
+        setHasWon(false);
+        setFinalStats(null);
+        initializeGame();
+      }}
+    />
+  )}
+
     </View>
 
     
