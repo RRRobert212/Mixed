@@ -6,10 +6,6 @@ I mistrust all frank and simple people, especially when their stories hold toget
 This wine is too good for toast-drinking, my dear. You don't want to mix emotions up with a wine like that. | Ernest Hemingway, *The Sun Also Rises*
 This is a hell of dull talk... How about some of that champagne? | Ernest Hemingway, *The Sun Also Rises*
 
-I declare after all there is no enjoyment like reading! How much sooner one tires of any thing than of a book! | Jane Austen, *Pride and Prejudice*
-A lady's imagination is very rapid; it jumps from admiration to love, from love to matrimony in a moment. | Jane Austen, *Pride and Prejudice*
-What are men to rocks and mountains? | Jane Austen, *Pride and Prejudice*
-
 The books that the world calls immoral are books that show the world its own shame. |  Oscar Wilde, *The Picture of Dorian Gray*
 Nowadays people know the price of everything and the value of nothing. | Oscar Wilde, *The Picture of Dorian Gray*
 Behind every exquisite thing that existed, there was something tragic. | Oscar Wilde, *The Picture of Dorian Gray*
@@ -21,15 +17,16 @@ If one doesn't talk about a thing, it has never happened. It is simply expressio
 
 
 
-By the pricking of my thumbs, Something wicked this way comes. | William Shakespeare, *Macbeth*
-It is a tale Told by an idiot, full of sound and fury, Signifying nothing. | William Shakespeare, *Macbeth*
-Life's but a walking shadow, a poor player, That struts and frets his hour upon the stage, And then is heard no more. | William Shakespeare, *Macbeth*
-Look like the innocent flower, But be the serpent under it. | William Shakespeare, *Macbeth*
+By the pricking of my thumbs, something wicked this way comes. | William Shakespeare, *Macbeth*
+It is a tale told by an idiot, full of sound and fury, signifying nothing. | William Shakespeare, *Macbeth*
+Life's but a walking shadow, a poor player, that struts and frets his hour upon the stage, and then is heard no more. | William Shakespeare, *Macbeth*
+Look like the innocent flower, but be the serpent under it. | William Shakespeare, *Macbeth*
 
 One may smile, and smile, and be a villain; at least I'm sure it may be so in Denmark. | William Shakespeare, *Hamlet*
 Something is rotten in the state of Denmark. | William Shakespeare, *Hamlet*
 I could be bounded in a nutshell, and count myself a king of infinite space, were it not that I have bad dreams. | William Shakespeare, *Hamlet*
 Alas, poor Yorick! I knew him, Horatio: a fellow of infinite jest, of most excellent fancy... | William Shakespeare, *Hamlet*
+The lady doth protest too much, methinks | William Shakespeare, *Hamlet*
 
 These violent delights have violent ends | William Shakespeare, *Romeo and Juliet*
 Good night, good night! parting is such sweet sorrow, That I shall say good night till it be morrow. | William Shakespeare, *Romeo and Juliet*
@@ -47,7 +44,78 @@ The gates of hell are open night and day; Smooth the descent, and easy is the wa
 
 Of all creatures that breathe and move upon the earth, nothing is bred that is weaker than man. | Homer *The Odyssey*
 There is a time for many words, and there is also a time for sleep. | Homer *The Odyssey*
+For a friend with an understanding heart is worth no less than a brother | Homer *The Odyssey*
+The blade itself incites to deeds of violence. | Homer *The Odyssey*
 
+Do not spoil what you have by desiring what you have not. | Epicurus
+Why should I fear death? If I am, then death is not. If Death is, then I am not. | Epicurus
+Of all the means to insure happiness throughout the whole life, by far the most important is the acquisition of friends. | Epicurus
+Not what we have But what we enjoy, constitutes our abundance. |  Epicurus
+
+That is just the way with some people. They get down on a thing when they don’t know nothing about it. | Mark Twain, *The Adventures of Huckleberry Finn*
+I couldn't bear to think about it; and yet, somehow, I couldn't think about nothing else. |  Mark Twain, *The Adventures of Huckleberry Finn*
+Having faith is believing in something you just know ain't true. | Mark Twain, *The Adventures of Huckleberry Finn*
+The less there is to justify a traditional custom, the harder it is to get rid of it | Mark Twain, *The Adventures of Tom Sawyer* 
+
+A heart is not judged by how much you love; but by how much you are loved by others. | L. Frank Baum, *The Wonderful Wizard of Oz*
+If we walk far enough," says Dorothy, "we shall sometime come to someplace. |  L. Frank Baum, *The Wonderful Wizard of Oz*
+There is no place like home. | L. Frank Baum, *The Wonderful Wizard of Oz*
+
+Words are, of course, the most powerful drug used by mankind. | Rudyard Kipling
+A man can never have too much red wine, too many books, or too much ammunition. | Rudyard Kipling
+The world is very lovely, and it's very horrible, and it doesn't care about your life or mine or anything else. | Rudyard Kipling *The Light That Failed*
+
+
+If ever a mortal heard the voice of God, it would be in the garden at the cool of the day | Frank Frankfort Moore
+To offer a man friendship when love is in his heart is like giving a loaf of bread to one who is dying of thirst. | Frank Frankfort Moore, *The Jessamy Bride*
+Fate never knows when comedy ends and tragedy begins. |  Frank Frankfort Moore, *The Original Woman* 
+
+One half of the world cannot understand the pleasures of the other | Jane Austen *Emma*
+My sore throats are always worse than anyone's. | Jane Austen *Persuasion*
+It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. | Jane Austen *Pride and Prejudice*
+I declare after all there is no enjoyment like reading! How much sooner one tires of any thing than of a book! | Jane Austen, *Pride and Prejudice*
+A lady's imagination is very rapid; it jumps from admiration to love, from love to matrimony in a moment. | Jane Austen, *Pride and Prejudice*
+What are men to rocks and mountains? | Jane Austen, *Pride and Prejudice*
+You have delighted us long enough. | Jane Austen, *Pride and Prejudice*
+
+
+Believe nothing you hear, and only one half that you see. | Edgar Allan Poe, *The System of Doctor Tarr and Professor Fether*
+
+There is no excellent beauty that hath not some strangeness in the proportion. | Francis Bacon *Of Beauty*
+Prosperity doth best discover vice, but adversity doth best discover virtue. | Francis Bacon *Of Adversity*
+The remedy is worse than the disease. | Francis Bacon *Of Seditions and Troubles*
+I have often thought upon death and I find it the least of all evils. | Francis Bacon *An Essay on Death*
+The joys of parents are secret, and so are their griefs and fears. | Francis Bacon *Of Parents and Children*
+Age will not be defied. | Francis Bacon, *Of Regimen of Health*
+A man that studieth revenge keep his own wounds green. | Francis Bacon *Of Revenge*
+To spend too much time in studies is sloth | Francis Bacon *Of Studies*
+Some books are to be tasted, others to be swallowed, and some few to be chewed and digested... | Francis Bacon *Of Studies*
+
+
+If I were not Alexander, I would be Diogenes | Plutarch, *Life of Alexander*
+Power tends to corrupt and absolute power corrupts absolutely. | Lord Acton, Letter
+Man is by nature a political animal. | Aristotle, *Politics*
+Poetry is something more philosophic and of graver import than history. | Aristotle *Poetics*
+We should count time by heart-throbs. | Philip James Bailey *Festus*
+America, thou half-brother of the world; with something good and bad of every land. | Philip James Bailey *Festus*
+Yankee Doodle came to town riding on a pony; stuck a feather in his hat and called it macaroni. | Edward Bangs *Yankee Doodle*
+There's a sucker born every minute. | Phineas T. Barnum
+America! America! God shed His grace on thee. And crown thy good with brotherhood from sea to shining sea! | Katherine Lee Bates *America the Beautiful*
+To die will be an awfully big adventure. | Sir James Matthew Barrie *Peter Pan*
+Every man who is high up loves to think that he has done it all himself. | Sir James Matthew Barrie *What Every Woman Knows*
+Absence makes the heart grow fonder | Thomas Haynes Bayly *Isle of Beauty*
+There is no drinking after death. | John Fletcher *The Bloody Brother*
+Let's meet, and either do, or die. | John Fletcher *The Island Princess*
+There is always something rather absurd about the past | Sir Max Beerbohm
+Mankind is divisble into two great classes: hosts and guests. | Sir Max Beerbohm, *Hosts and Guests*
+When I am dead I hope it may be said: 'His sins were scarlet, but his books were read.' | Hilaire Belloc *Epigrams. On His Books*
+They died to save their country and they only saved the world | Hilaire Belloc *The English Graves*
+No man is demolished but by himself. | Thomas Bentley, *A letter to Mr. Pope*
+Journalists say a thing that they know isn't true, in the hope that if they keep on saying it long enough it will be true | Enoch Arnold Bennett, *The Title*
+Because the road is rough and long, shall we despise the skylark's song? | Anne Brontë, *Views of Life*
+Fish say, they have their stream and pond; but is there anything beyond? | Rupert Brooke *Heaven*
+I, John Brown, am now quite certain that the crimes of this guilty land will never be purged away but with blood. | John Brown, last statement
+Persecution is a bad and indirect way to plant religion. | Sir Thomas Browne *Religio Medici*
 
 
 
@@ -56,6 +124,9 @@ There is a time for many words, and there is also a time for sleep. | Homer *The
 
 
 Like all young people I was immortal once. | John Horton Conway
+
+Vox populi, vox dei. The voice of the people is the voice of God. | Alcuin, *Letter to Charlemagne*
+Nam et ipsa scientia potestas est. Knowledge itself is power. | Francis Bacon, *Religious Meditations*
 
 
 
