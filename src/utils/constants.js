@@ -26,7 +26,7 @@ export const ANIMATION = {
 };
 
 export const WORD_LIST = [
-'abandon', 'all', 'hope,' 
+'abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here' 
 ];
 
 //difficulty changes with these, max guesses and hints

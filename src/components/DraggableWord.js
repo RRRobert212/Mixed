@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { 
   clamp, 
-  getBoundingConstraints, 
+  getBoundingConstraints,
   getValidYPositions, 
   snapToRow 
 } from '../utils/PositionUtils';
