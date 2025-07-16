@@ -1,10 +1,13 @@
+//VictoryScreen.js
+
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // ✅ Add this
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, performance }) {
+export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, guessesUsed, performance }) {
+
   const navigation = useNavigation(); // ✅ Hook into navigation
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -43,6 +46,22 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
     navigation.navigate('Home'); // ✅ Adjust route name as needed
   };
 
+
+  function renderAttribution(text) {
+  const parts = text.split(/(\*[^*]+\*)/); // splits by *...*
+  return parts.map((part, index) => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return (
+        <Text key={index} style={{ fontStyle: 'italic' }}>
+          {part.slice(1, -1)}
+        </Text>
+      );
+    } else {
+      return <Text key={index}>{part}</Text>;
+    }
+  });
+}
+
   return (
     <View style={styles.fullscreen}>
       <Animated.View style={[styles.overlay, { opacity: overlayFadeAnim }]} />
@@ -55,6 +74,10 @@ export default function VictoryScreen({ fullQuote, hintsUsed, guessesUsed, perfo
       ]}>
         <Text style={styles.title}>{performance}</Text>
         <Text style={styles.quote}>"{fullQuote}"</Text>
+        <Text style={styles.attribution}>
+          {renderAttribution(quoteAttribution)}
+        </Text>
+
         <Text style={styles.stats}>Guesses: {guessesUsed}</Text>
         <Text style={styles.stats}>Hints Used: {hintsUsed}</Text>
 
@@ -100,6 +123,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
     textAlign: 'center',
+  },
+  attribution: {
+  fontSize: 16,
+  color: '#666',
+  fontFamily: 'serif',
+  textAlign: 'center',
+  marginBottom: 20,
   },
   stats: {
     fontSize: 22,

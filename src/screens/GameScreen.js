@@ -14,6 +14,7 @@ import {
   createInitialPositions 
 } from '../utils/spawnUtils';
 import { LAYOUT, ANIMATION, WORD_LIST } from '../utils/constants';
+import { QUOTE_ATTRIBUTION } from '../utils/constants';
 import { verifyOrder } from '../utils/verification';
 
 import Timer from '../components/Timer';
@@ -371,17 +372,18 @@ function triggerHintMessage() {
       </View>
 
     {hasWon && finalStats && (
-    <VictoryScreen
-      fullQuote={finalStats.fullQuote}
-      hintsUsed={finalStats.hintsUsed}
-      guessesUsed={finalStats.guessesUsed}
-      performance={finalStats.performance}
-      onClose={() => {
-        setHasWon(false);
-        setFinalStats(null);
-        initializeGame();
-      }}
-    />
+      <VictoryScreen
+        fullQuote={finalStats.fullQuote}
+        quoteAttribution={QUOTE_ATTRIBUTION[1][0]}
+        hintsUsed={finalStats.hintsUsed}
+        guessesUsed={finalStats.guessesUsed}
+        performance={finalStats.performance}
+        onClose={() => {
+          setHasWon(false);
+          setFinalStats(null);
+          initializeGame();
+        }}
+      />
   )}
 
     </View>

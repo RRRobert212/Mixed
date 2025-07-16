@@ -26,13 +26,13 @@ export const ANIMATION = {
 };
 
 export const WORD_LIST = [
-'abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here' 
+'Abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here.' 
 ];
 
 //workaround to avoid annoying refactor, just have this second thing be where you get the text for the end screen
 //hmm should it just be a straightup string? should the first one be a straightup string? my next project
 export const QUOTE_ATTRIBUTION = [
-  ['abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here' ], ['Dante Aligheri *Inferno*']
+  ['abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here' ], ['Dante Aligheri, *Inferno*']
 ]
 
 //difficulty changes with these, max guesses and hints
