@@ -118,18 +118,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   quote: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'serif',
     color: '#333',
-    marginBottom: 15,
+    marginBottom: 10,
     textAlign: 'center',
   },
   attribution: {
-  fontSize: 16,
+  fontSize: 18,
   color: '#666',
   fontFamily: 'serif',
   textAlign: 'center',
-  marginBottom: 20,
+  marginBottom: 10,
   },
   stats: {
     fontSize: 22,

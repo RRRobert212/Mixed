@@ -192,7 +192,8 @@ function handleSubmit() {
         : 'A win is a win...';
 
     setFinalStats({
-      fullQuote: userAnswer.join(' '),
+      fullQuote: QUOTE_ATTRIBUTION[0].join(' '),
+      quoteAttribution: QUOTE_ATTRIBUTION[1][0],
       hintsUsed,
       guessesUsed,
       performance,
@@ -374,7 +375,7 @@ function triggerHintMessage() {
     {hasWon && finalStats && (
       <VictoryScreen
         fullQuote={finalStats.fullQuote}
-        quoteAttribution={QUOTE_ATTRIBUTION[1][0]}
+        quoteAttribution={finalStats.quoteAttribution}
         hintsUsed={finalStats.hintsUsed}
         guessesUsed={finalStats.guessesUsed}
         performance={finalStats.performance}
