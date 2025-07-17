@@ -27,6 +27,9 @@ import ConnectionLines from '../components/ConnectionLines';
 
 import VictoryScreen from '../screens/VictoryScreen';
 
+// Import victory animation
+import { playVictoryAnimation } from '../utils/victoryAnimation';
+
 export default function GameScreen() {
   const [wordPositions, setWordPositions] = useState([]);
   const [spawnedWords, setSpawnedWords] = useState(0);
@@ -54,6 +57,11 @@ export default function GameScreen() {
 
   // New state for current quote
   const [currentQuote, setCurrentQuote] = useState(null);
+
+  // Victory animation state
+  const [isPlayingVictoryAnimation, setIsPlayingVictoryAnimation] = useState(false);
+  const [victoryAnimatingWords, setVictoryAnimatingWords] = useState(new Set());
+  const [showVictoryScreen, setShowVictoryScreen] = useState(false);
 
   function updatePosition(index, newX, newY, boxSize) {
     setWordPositions(currentPositions => {
@@ -127,6 +135,11 @@ export default function GameScreen() {
     setConnections([]);
     setPersistentConnections([]);
 
+    // Reset victory animation state
+    setIsPlayingVictoryAnimation(false);
+    setVictoryAnimatingWords(new Set());
+    setShowVictoryScreen(false);
+
     startSpawning(quote.words.length);
   };
 
@@ -169,6 +182,39 @@ export default function GameScreen() {
       .map(p => p.word);
   };
 
+  const startVictoryAnimation = () => {
+    setIsPlayingVictoryAnimation(true);
+    
+    // Create positions array for victory animation
+    const positions = wordPositions.map(pos => ({
+      x: pos.x,
+      y: pos.y
+    }));
+
+    playVictoryAnimation(
+      positions,
+      (wordIndex) => {
+        // Called when each word starts animating
+        setVictoryAnimatingWords(prev => new Set([...prev, wordIndex]));
+      },
+      () => {
+        // Called when all animations complete
+        setIsPlayingVictoryAnimation(false);
+        setVictoryAnimatingWords(new Set());
+        setShowVictoryScreen(true);
+      }
+    );
+  };
+
+  const handleVictoryAnimationComplete = (wordIndex) => {
+    // Called when individual word animation completes
+    setVictoryAnimatingWords(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(wordIndex);
+      return newSet;
+    });
+  };
+
   function handleSubmit() {
     if (remainingSubmits <= 0 || !currentQuote) {
       return;
@@ -201,6 +247,9 @@ export default function GameScreen() {
       });
 
       setHasWon(true);
+      
+      // Start victory animation
+      startVictoryAnimation();
     } else {
       console.log('WRONG');
     }
@@ -344,6 +393,9 @@ export default function GameScreen() {
             onLockedAttempt={triggerLockedMessage}
             adjacentToCorrect={wordPositions[index].adjacentToCorrect}
             correctIndexTag={wordPositions[index].correctIndexTag}
+            // Victory animation props
+            shouldPlayVictoryAnimation={victoryAnimatingWords.has(index)}
+            onVictoryAnimationComplete={() => handleVictoryAnimationComplete(index)}
           />
         ))}
 
@@ -368,7 +420,7 @@ export default function GameScreen() {
         <SubmitButton onPress={handleSubmit} remainingSubmits={remainingSubmits} />
       </View>
 
-      {hasWon && finalStats && (
+      {hasWon && finalStats && showVictoryScreen && (
         <VictoryScreen
           fullQuote={finalStats.fullQuote}
           quoteAttribution={finalStats.quoteAttribution}

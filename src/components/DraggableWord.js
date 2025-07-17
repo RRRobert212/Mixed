@@ -13,6 +13,11 @@ import {
   snapToRow 
 } from '../utils/PositionUtils';
 import { ANIMATION } from '../utils/constants';
+import { 
+  createVictoryAnimationValues, 
+  playWordVictoryAnimation, 
+  resetVictoryAnimation 
+} from '../utils/victoryAnimation';
 
 export default function DraggableWord({ 
   word, 
@@ -27,8 +32,9 @@ export default function DraggableWord({
   onLockedAttempt,
   adjacentToCorrect = false,
   correctIndexTag,
-
-
+  // New props for victory animation
+  shouldPlayVictoryAnimation = false,
+  onVictoryAnimationComplete,
 }) {
   const pan = useRef(new Animated.ValueXY(initialPosition)).current;
   const scale = useRef(new Animated.Value(0)).current;
@@ -43,6 +49,36 @@ export default function DraggableWord({
   const lastTapRef = useRef(0);
   const tapTimeoutRef = useRef(null);
   const previousLocked = useRef(locked);
+  
+  // Victory animation values
+  const victoryAnimationValues = useRef(createVictoryAnimationValues()).current;
+  const hasPlayedVictoryAnimation = useRef(false);
+  const [shouldStayGreen, setShouldStayGreen] = useState(false); // New state to track if word should stay green
+
+  // Handle victory animation
+  useEffect(() => {
+    if (shouldPlayVictoryAnimation && !hasPlayedVictoryAnimation.current) {
+      hasPlayedVictoryAnimation.current = true;
+      
+      playWordVictoryAnimation(victoryAnimationValues, () => {
+        // When animation completes, mark this word to stay green
+        setShouldStayGreen(true);
+        onVictoryAnimationComplete && onVictoryAnimationComplete();
+      }, true); // keepHighlighted = true
+    }
+    // Note: We don't reset when shouldPlayVictoryAnimation becomes false
+    // This allows the word to stay green
+  }, [shouldPlayVictoryAnimation, onVictoryAnimationComplete]);
+
+  // Reset victory state only when starting a new game
+  useEffect(() => {
+    if (!shouldSpawn && !hasSpawned.current) {
+      // This indicates a new game is starting
+      hasPlayedVictoryAnimation.current = false;
+      setShouldStayGreen(false);
+      resetVictoryAnimation(victoryAnimationValues, true); // Reset highlight for new game
+    }
+  }, [shouldSpawn]);
 
   // Handle lock/unlock animations
   useEffect(() => {
@@ -291,21 +327,43 @@ export default function DraggableWord({
     outputRange: ['0deg', '2deg']
   });
 
+  // Calculate victory highlight background color
+  const victoryBackgroundColor = victoryAnimationValues.victoryHighlight.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['transparent', '#4CAF50'] // Green highlight
+  });
+
+  // Determine background color priority
+  const getBackgroundColor = () => {
+    if (shouldStayGreen || shouldPlayVictoryAnimation) {
+      return victoryBackgroundColor;
+    }
+    if (locked) {
+      return '#4CAF50';
+    }
+    if (adjacentToCorrect && !locked) {
+      return '#FFEB3B';
+    }
+    return '#ddd';
+  };
+
   return (
     <Animated.View
       style={[
         styles.wordContainer,
         isBeingDragged && styles.wordContainerDragging,
         locked && styles.lockedWord,
-        adjacentToCorrect && !locked && styles.adjacentWord, // highlight only if not already locked
+        adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord, // Only show yellow if not green
         pan.getLayout(),
         {
           transform: [
             { scale: scale },
             { scale: lockScale },
+            { scale: victoryAnimationValues.victoryScale }, // Victory animation scale
             { rotate: rotationInterpolation }
           ],
-          opacity: lockOpacity
+          opacity: lockOpacity,
+          backgroundColor: getBackgroundColor()
         }
       ]}
       {...panResponder.panHandlers}
@@ -350,27 +408,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   adjacentWord: {
-  backgroundColor: '#FFEB3B', // Material yellow
-},
-indexBadge: {
-  position: 'absolute',
-  top: -8,
-  right: -8,
-  backgroundColor: '#4CAF50',
-  color: 'white',
-  borderRadius: 10,
-  paddingHorizontal: 4,
-  fontSize: 10,
-  fontWeight: 'bold',
-  overflow: 'hidden',
-  zIndex: 10,
-  minWidth: 24,
-  height: 16,                 // ✅ Set fixed height
-  lineHeight: 16,             // ✅ Match height exactly
-  textAlign: 'center',
-  includeFontPadding: false,  // ✅ Prevent extra vertical padding on Android
-  textAlignVertical: 'center',// ✅ Android vertical center (has no effect on iOS)
-},
-
-
+    backgroundColor: '#FFEB3B', // Material yellow
+  },
+  indexBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 4,
+    fontSize: 10,
+    fontWeight: 'bold',
+    overflow: 'hidden',
+    zIndex: 10,
+    minWidth: 24,
+    height: 16,                 // ✅ Set fixed height
+    lineHeight: 16,             // ✅ Match height exactly
+    textAlign: 'center',
+    includeFontPadding: false,  // ✅ Prevent extra vertical padding on Android
+    textAlignVertical: 'center',// ✅ Android vertical center (has no effect on iOS)
+  },
 });
