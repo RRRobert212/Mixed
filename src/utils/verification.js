@@ -1,7 +1,5 @@
 // utils/verification.js
 
-import { WORD_LIST } from './constants';
-
 export function evaluateWordPositions(positions, correctList, layout) {
   const updated = [...positions];
   const connectedPairs = [];
@@ -19,13 +17,12 @@ export function evaluateWordPositions(positions, correctList, layout) {
   sorted.forEach((pos, i) => {
     const correctWord = correctList[i];
     const isCorrect = pos.word === correctWord;
-
     const previous = positions[pos.index];
 
     updated[pos.index] = {
       ...updated[pos.index],
-      locked: isCorrect,  
-      isCorrect: isCorrect,                 
+      locked: isCorrect,
+      isCorrect: isCorrect,
       correctIndexTag: previous?.correctIndexTag ?? (isCorrect ? i + 1 : null),
       adjacentToCorrect: false
     };
@@ -59,11 +56,8 @@ export function evaluateWordPositions(positions, correctList, layout) {
   return { updatedPositions: updated, connectedPairs };
 }
 
-
-
-
-export function verifyOrder(userOrder) {
-  return arraysEqual(userOrder, WORD_LIST);
+export function verifyOrder(userOrder, correctOrder) {
+  return arraysEqual(userOrder, correctOrder);
 }
 
 function arraysEqual(arr1, arr2) {

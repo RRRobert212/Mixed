@@ -1,10 +1,12 @@
 // utils/QuoteService.js
-import quotes from '../assets/quotes.json';
+import quotes from '../../assets/quotes.json';
 
 export function getRandomQuote() {
-  const random = quotes[Math.floor(Math.random() * quotes.length)];
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const selectedQuote = quotes[randomIndex];
+  
   return {
-    words: random.text.split(' '),
-    attribution: random.attribution
+    words: selectedQuote.words,
+    attribution: selectedQuote.attribution
   };
 }

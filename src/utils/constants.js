@@ -2,7 +2,6 @@
 import { Dimensions } from 'react-native';
 
 export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 export const BUTTON_WIDTH = SCREEN_WIDTH * 0.3;
 
 export const LAYOUT = {
@@ -25,17 +24,6 @@ export const ANIMATION = {
   SCALE_TENSION: 200,
 };
 
-export const WORD_LIST = [
-'Abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here.' 
-];
-
-//workaround to avoid annoying refactor, just have this second thing be where you get the text for the end screen
-//hmm should it just be a straightup string? should the first one be a straightup string? my next project
-export const QUOTE_ATTRIBUTION = [
-  ['Abandon', 'all', 'hope,', 'ye', 'who', 'enter', 'here.' ], ['Dante Aligheri, *Inferno*']
-]
-
-//difficulty changes with these, max guesses and hints
+// Difficulty changes with these, max guesses and hints
 export const MAX_SUBMITS = 4;
 export const MAX_HINTS = 3;
-

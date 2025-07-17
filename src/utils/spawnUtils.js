@@ -1,21 +1,21 @@
 // spawnUtils.js
-import { SCREEN_WIDTH, SCREEN_HEIGHT, LAYOUT, WORD_LIST } from './constants';
+import { SCREEN_WIDTH, SCREEN_HEIGHT, LAYOUT } from './constants';
 import { rectsOverlap, getValidYPositions } from './PositionUtils';
 
-export function generateSpawnPositions() {
+export function generateSpawnPositions(words) {
   const defaultBoxSize = { width: 120, height: 40 };
   const validYPositions = getValidYPositions(defaultBoxSize.height);
   const targetPositions = [];
 
   // Generate all target positions
-  for (let i = 0; i < WORD_LIST.length; i++) {
+  for (let i = 0; i < words.length; i++) {
     let pos;
     let attempts = 0;
     
     do {
       // Random X position (grid-aligned)
       const randomX = Math.floor(
-        Math.random() * 
+        Math.random() *
         ((SCREEN_WIDTH - LAYOUT.EDGE_PADDING * 2 - defaultBoxSize.width) / LAYOUT.GRID_SIZE)
       ) * LAYOUT.GRID_SIZE + LAYOUT.EDGE_PADDING;
       
@@ -34,10 +34,10 @@ export function generateSpawnPositions() {
       targetPositions.some(p => rectsOverlap(pos, p)) &&
       attempts < 100
     );
-    
+
     pos.rect = { x: pos.x, y: pos.y, width: pos.width, height: pos.height };
     pos.index = i;
-    pos.word = WORD_LIST[i];
+    pos.word = words[i];
     targetPositions.push(pos);
   }
 
@@ -53,21 +53,21 @@ export function generateSpawnOrder(length) {
   return spawnOrder;
 }
 
-export function createInitialPositions(targetPositions, spawnOrder) {
+export function createInitialPositions(targetPositions, spawnOrder, words) {
   const defaultBoxSize = { width: 120, height: 40 };
   const centerX = SCREEN_WIDTH / 2 - defaultBoxSize.width / 2;
   const centerY = SCREEN_HEIGHT / 2 - defaultBoxSize.height / 2;
-  
-  return WORD_LIST.map((word, i) => ({
+
+  return words.map((word, i) => ({
     x: centerX,
     y: centerY,
     width: defaultBoxSize.width,
     height: defaultBoxSize.height,
-    rect: { 
-      x: centerX, 
-      y: centerY, 
-      width: defaultBoxSize.width, 
-      height: defaultBoxSize.height 
+    rect: {
+      x: centerX,
+      y: centerY,
+      width: defaultBoxSize.width,
+      height: defaultBoxSize.height
     },
     index: i,
     word: word,
