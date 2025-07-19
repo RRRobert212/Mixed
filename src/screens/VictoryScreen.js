@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'; // ✅ Add this
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, guessesUsed, performance }) {
+export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, guessesUsed, performance, onClose }) {
 
   const navigation = useNavigation(); // ✅ Hook into navigation
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -43,7 +43,7 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, 
   if (!shouldShowContent) return null;
 
   const handleGoHome = () => {
-    navigation.navigate('Home'); // ✅ Adjust route name as needed
+    navigation.navigate('Home');
   };
 
 
@@ -83,6 +83,12 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, 
 
         <TouchableOpacity style={styles.button} onPress={handleGoHome}>
           <Text style={styles.buttonText}>Back to Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={onClose}
+        >
+          <Text style={styles.closeButtonText}>×</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -149,4 +155,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  closeButton: {
+  position: 'absolute',
+  top: 20,
+  right: 20,
+  zIndex: 1000,
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  borderRadius: 20,
+  width: 36,
+  height: 36,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+closeButtonText: {
+  color: '#fff',
+  fontSize: 24,
+  fontWeight: 'bold',
+  lineHeight: 24,
+},
+
 });

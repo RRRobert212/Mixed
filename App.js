@@ -5,41 +5,44 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screens/HomeScreen';
 import GameScreen from './src/screens/GameScreen';
 import HeaderGameScreen from './src/components/HeaderGameScreen';
+import HeaderHomeScreen from './src/components/HeaderHomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
+import SettingsScreen from './src/screens/SettingsScreen';
+import InfoScreen from './src/screens/InfoScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen 
-        name="Game" 
-        component={GameScreen} 
-        options={{
-          gestureEnabled: false,
-          presentation: 'card',
-          fullScreenGestureEnabled: false,
-          header: (props) => (
-            <HeaderGameScreen
-              title="Game"
-              onSettingsPress={() => {
-                // Navigate to settings or open modal
-                props.navigation.navigate('Settings');
-              }}
-              onInfoPress={() => {
-                // Show info modal or screen
-                props.navigation.navigate('Info');
-              }}
-            />
-          ),
-        }}>
-        </Stack.Screen>
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={({ navigation }) => ({
+              header: () => <HeaderHomeScreen navigation={navigation} />,
+            })}
+          />
+
+          <Stack.Screen
+            name="Game"
+            options={({ navigation }) => ({
+              gestureEnabled: false,
+              presentation: 'card',
+              fullScreenGestureEnabled: false,
+              header: () => (
+                <HeaderGameScreen navigation={navigation} />
+              ),
+            })}
+          >
+            {(props) => <GameScreen {...props} />}
+          </Stack.Screen>
+
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="Info" component={InfoScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
