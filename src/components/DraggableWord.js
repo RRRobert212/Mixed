@@ -1,5 +1,5 @@
 // DraggableWord.js
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import {
   Animated,
   PanResponder,
@@ -53,30 +53,42 @@ export default function DraggableWord({
   // Victory animation values
   const victoryAnimationValues = useRef(createVictoryAnimationValues()).current;
   const hasPlayedVictoryAnimation = useRef(false);
-  const [shouldStayGreen, setShouldStayGreen] = useState(false); // New state to track if word should stay green
+  const [shouldStayGreen, setShouldStayGreen] = useState(false);
+  const victoryAnimationInProgress = useRef(false);
 
-  // Handle victory animation
-  useEffect(() => {
-    if (shouldPlayVictoryAnimation && !hasPlayedVictoryAnimation.current) {
-      hasPlayedVictoryAnimation.current = true;
-      
-      playWordVictoryAnimation(victoryAnimationValues, () => {
-        // When animation completes, mark this word to stay green
+  // Memoize the victory animation complete callback to prevent unnecessary re-renders
+  const handleVictoryAnimationComplete = useCallback(() => {
+    if (victoryAnimationInProgress.current) {
+      victoryAnimationInProgress.current = false;
+      // Use setTimeout to defer the state update to avoid scheduling during render
+      setTimeout(() => {
         setShouldStayGreen(true);
         onVictoryAnimationComplete && onVictoryAnimationComplete();
-      }, true); // keepHighlighted = true
+      }, 0);
     }
-    // Note: We don't reset when shouldPlayVictoryAnimation becomes false
-    // This allows the word to stay green
-  }, [shouldPlayVictoryAnimation, onVictoryAnimationComplete]);
+  }, [onVictoryAnimationComplete]);
+
+  // Handle victory animation with better state management
+  useEffect(() => {
+    if (shouldPlayVictoryAnimation && !hasPlayedVictoryAnimation.current && !victoryAnimationInProgress.current) {
+      hasPlayedVictoryAnimation.current = true;
+      victoryAnimationInProgress.current = true;
+      
+      // Use setTimeout to defer the animation start
+      setTimeout(() => {
+        playWordVictoryAnimation(victoryAnimationValues, handleVictoryAnimationComplete, true);
+      }, 0);
+    }
+  }, [shouldPlayVictoryAnimation, handleVictoryAnimationComplete]);
 
   // Reset victory state only when starting a new game
   useEffect(() => {
     if (!shouldSpawn && !hasSpawned.current) {
       // This indicates a new game is starting
       hasPlayedVictoryAnimation.current = false;
+      victoryAnimationInProgress.current = false;
       setShouldStayGreen(false);
-      resetVictoryAnimation(victoryAnimationValues, true); // Reset highlight for new game
+      resetVictoryAnimation(victoryAnimationValues, true);
     }
   }, [shouldSpawn]);
 
@@ -173,7 +185,7 @@ export default function DraggableWord({
     }
   }, [shouldSpawn, targetPosition]);
 
-  const handleSpawnComplete = () => {
+  const handleSpawnComplete = useCallback(() => {
     if (boxSizeRef.current.width > 0 && boxSizeRef.current.height > 0) {
       const constraints = getBoundingConstraints(boxSizeRef.current);
       const validYPositions = getValidYPositions(boxSizeRef.current.height);
@@ -188,7 +200,7 @@ export default function DraggableWord({
       
       onSpawnComplete && onSpawnComplete(clampedX, clampedY, boxSizeRef.current);
     }
-  };
+  }, [targetPosition, onSpawnComplete, pan, scale]);
 
   // Set scale for already spawned words
   useEffect(() => {
@@ -218,13 +230,13 @@ export default function DraggableWord({
     }
   }, [initialPosition, isSpawning, pan]);
 
-  const handleDoubleTap = () => {
+  const handleDoubleTap = useCallback(() => {
     if (locked && onUnlock) {
       onUnlock();
     }
-  };
+  }, [locked, onUnlock]);
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     const now = Date.now();
     const timeSinceLastTap = now - lastTapRef.current;
     
@@ -243,7 +255,7 @@ export default function DraggableWord({
     }
     
     lastTapRef.current = now;
-  };
+  }, [handleDoubleTap]);
 
   const panResponder = useMemo(() => 
     PanResponder.create({
@@ -318,7 +330,7 @@ export default function DraggableWord({
         }
       },
     }),
-    [locked, onLockedAttempt, onDragEnd, pan, scale]// Recreate panResponder when locked changes
+    [locked, onLockedAttempt, onDragEnd, pan, scale, handlePress]
   );
 
   // Calculate rotation interpolation
@@ -333,8 +345,8 @@ export default function DraggableWord({
     outputRange: ['transparent', '#4CAF50'] // Green highlight
   });
 
-  // Determine background color priority
-  const getBackgroundColor = () => {
+  // Determine background color priority - memoized to prevent unnecessary re-renders
+  const backgroundColor = useMemo(() => {
     if (shouldStayGreen || shouldPlayVictoryAnimation) {
       return victoryBackgroundColor;
     }
@@ -345,7 +357,7 @@ export default function DraggableWord({
       return '#FFEB3B';
     }
     return '#ddd';
-  };
+  }, [shouldStayGreen, shouldPlayVictoryAnimation, locked, adjacentToCorrect, victoryBackgroundColor]);
 
   return (
     <Animated.View
@@ -363,7 +375,7 @@ export default function DraggableWord({
             { rotate: rotationInterpolation }
           ],
           opacity: lockOpacity,
-          backgroundColor: getBackgroundColor()
+          backgroundColor: backgroundColor
         }
       ]}
       {...panResponder.panHandlers}

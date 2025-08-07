@@ -1,5 +1,5 @@
 // GameScreen.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import DraggableWord from '../components/DraggableWord';
 import { 
@@ -62,8 +62,10 @@ export default function GameScreen() {
   const [isPlayingVictoryAnimation, setIsPlayingVictoryAnimation] = useState(false);
   const [victoryAnimatingWords, setVictoryAnimatingWords] = useState(new Set());
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
+  const victoryAnimationInProgress = useRef(false);
+  const completedVictoryAnimations = useRef(new Set());
 
-  function updatePosition(index, newX, newY, boxSize) {
+  const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
       const currentPos = currentPositions[index];
       if (currentPos && 
@@ -104,17 +106,17 @@ export default function GameScreen() {
 
       return newPositions;
     });
-  }
+  }, []);
 
-  function handleSpawnComplete(index, finalX, finalY, boxSize) {
+  const handleSpawnComplete = useCallback((index, finalX, finalY, boxSize) => {
     updatePosition(index, finalX, finalY, boxSize);
-  }
+  }, [updatePosition]);
 
   useEffect(() => {
     initializeGame();
   }, []);
 
-  const initializeGame = () => {
+  const initializeGame = useCallback(() => {
     // Get a random quote at the start of each game
     const quote = getRandomQuote();
     setCurrentQuote(quote);
@@ -139,11 +141,13 @@ export default function GameScreen() {
     setIsPlayingVictoryAnimation(false);
     setVictoryAnimatingWords(new Set());
     setShowVictoryScreen(false);
+    victoryAnimationInProgress.current = false;
+    completedVictoryAnimations.current = new Set();
 
     startSpawning(quote.words.length);
-  };
+  }, []);
 
-  const startSpawning = (wordCount) => {
+  const startSpawning = useCallback((wordCount) => {
     const spawnInterval = setInterval(() => {
       setSpawnedWords(current => {
         const next = current + 1;
@@ -167,9 +171,9 @@ export default function GameScreen() {
     }, ANIMATION.SPAWN_INTERVAL);
 
     return () => clearInterval(spawnInterval);
-  };
+  }, [textOpacity]);
 
-  const getSortedWords = () => {
+  const getSortedWords = useCallback(() => {
     return [...wordPositions]
       .sort((a, b) => {
         const rowA = Math.floor(a.y / LAYOUT.GRID_SIZE);
@@ -180,10 +184,14 @@ export default function GameScreen() {
         return rowA - rowB;
       })
       .map(p => p.word);
-  };
+  }, [wordPositions]);
 
-  const startVictoryAnimation = () => {
+  const startVictoryAnimation = useCallback(() => {
+    if (victoryAnimationInProgress.current) return;
+    
+    victoryAnimationInProgress.current = true;
     setIsPlayingVictoryAnimation(true);
+    completedVictoryAnimations.current = new Set();
     
     // Create positions array for victory animation
     const positions = wordPositions.map(pos => ({
@@ -199,24 +207,32 @@ export default function GameScreen() {
       },
       () => {
         // Called when all animations complete
-        setIsPlayingVictoryAnimation(false);
-        setVictoryAnimatingWords(new Set());
-        setShowVictoryScreen(true);
+        setTimeout(() => {
+          setIsPlayingVictoryAnimation(false);
+          setVictoryAnimatingWords(new Set());
+          setShowVictoryScreen(true);
+          victoryAnimationInProgress.current = false;
+        }, 100); // Small delay to ensure all state updates are complete
       }
     );
-  };
+  }, [wordPositions]);
 
-  const handleVictoryAnimationComplete = (wordIndex) => {
+  const handleVictoryAnimationComplete = useCallback((wordIndex) => {
     // Called when individual word animation completes
-    setVictoryAnimatingWords(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(wordIndex);
-      return newSet;
-    });
-  };
+    completedVictoryAnimations.current.add(wordIndex);
+    
+    // Use setTimeout to defer state update
+    setTimeout(() => {
+      setVictoryAnimatingWords(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(wordIndex);
+        return newSet;
+      });
+    }, 0);
+  }, []);
 
-  function handleSubmit() {
-    if (remainingSubmits <= 0 || !currentQuote) {
+  const handleSubmit = useCallback(() => {
+    if (remainingSubmits <= 0 || !currentQuote || victoryAnimationInProgress.current) {
       return;
     }
 
@@ -248,14 +264,16 @@ export default function GameScreen() {
 
       setHasWon(true);
       
-      // Start victory animation
-      startVictoryAnimation();
+      // Defer victory animation start
+      setTimeout(() => {
+        startVictoryAnimation();
+      }, 100);
     } else {
       console.log('WRONG');
     }
-  }
+  }, [remainingSubmits, currentQuote, getSortedWords, remainingHints, startVictoryAnimation]);
 
-  function handleHint() {
+  const handleHint = useCallback(() => {
     if (remainingHints <= 0) {
       triggerHintMessage();
       return;
@@ -287,9 +305,9 @@ export default function GameScreen() {
     });
 
     setRemainingHints(prev => prev - 1);
-  }
+  }, [remainingHints, currentQuote, getSortedWords, wordPositions]);
 
-  function handleUnlock(index) {
+  const handleUnlock = useCallback((index) => {
     setWordPositions(prevPositions => {
       if (!prevPositions[index]?.locked) return prevPositions;
       
@@ -303,9 +321,9 @@ export default function GameScreen() {
         return pos;
       });
     });
-  }
+  }, []);
 
-  function triggerLockedMessage() {
+  const triggerLockedMessage = useCallback(() => {
     const now = Date.now();
 
     if (showLockedMessage || now - lastLockedMessageTime.current < 3000) return;
@@ -327,9 +345,9 @@ export default function GameScreen() {
         }).start(() => setShowLockedMessage(false));
       }, 1500);
     });
-  }
+  }, [showLockedMessage, lockedMessageOpacity]);
 
-  function triggerHintMessage() {
+  const triggerHintMessage = useCallback(() => {
     const now = Date.now();
 
     if (showHintMessage || now - lastHintMessageTime.current < 3000) return;
@@ -351,7 +369,7 @@ export default function GameScreen() {
         }).start(() => setShowHintMessage(false));
       }, 1500);
     });
-  }
+  }, [showHintMessage, hintMessageOpacity]);
 
   // Don't render anything until we have a quote
   if (!currentQuote) {
@@ -430,7 +448,8 @@ export default function GameScreen() {
           onClose={() => {
             setHasWon(false);
             setFinalStats(null);
-        
+            setShowVictoryScreen(false);
+            initializeGame();
           }}
         />
       )}
