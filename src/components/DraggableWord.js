@@ -1,27 +1,21 @@
-// DraggableWord.js
-import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Animated,
   PanResponder,
   Text,
   StyleSheet,
 } from 'react-native';
-import { 
-  clamp, 
-  getBoundingConstraints,
-  getValidYPositions, 
-  snapToRow 
-} from '../utils/PositionUtils';
+import { clamp, getBoundingConstraints, getValidYPositions, snapToRow } from '../utils/PositionUtils';
 import { ANIMATION } from '../utils/constants';
-import { 
-  createVictoryAnimationValues, 
-  playWordVictoryAnimation, 
-  resetVictoryAnimation 
-} from '../utils/victoryAnimation';
 
-export default function DraggableWord({ 
-  word, 
-  initialPosition = { x: 50, y: 100 }, 
+import useSpawnAnimation from '../hooks/useSpawnAnimation';
+import useVictoryAnimation from '../hooks/useVictoryAnimation';
+import useLockAnimation from '../hooks/useLockAnimation';
+import useDoubleTap from '../hooks/useDoubleTap';
+
+export default function DraggableWord({
+  word,
+  initialPosition = { x: 50, y: 100 },
   targetPosition = null,
   shouldSpawn = false,
   onDragEnd,
@@ -32,330 +26,178 @@ export default function DraggableWord({
   onLockedAttempt,
   adjacentToCorrect = false,
   correctIndexTag,
-  // New props for victory animation
   shouldPlayVictoryAnimation = false,
   onVictoryAnimationComplete,
 }) {
+  // Refs & state
   const pan = useRef(new Animated.ValueXY(initialPosition)).current;
   const scale = useRef(new Animated.Value(0)).current;
-  const lockScale = useRef(new Animated.Value(1)).current;
-  const lockRotation = useRef(new Animated.Value(0)).current;
-  const lockOpacity = useRef(new Animated.Value(1)).current;
   const boxSizeRef = useRef({ width: 0, height: 0 });
   const isDragging = useRef(false);
-  const hasSpawned = useRef(false);
-  const isCurrentlySpawning = useRef(false);
   const [isBeingDragged, setIsBeingDragged] = useState(false);
-  const lastTapRef = useRef(0);
-  const tapTimeoutRef = useRef(null);
   const previousLocked = useRef(locked);
-  
-  // Victory animation values
-  const victoryAnimationValues = useRef(createVictoryAnimationValues()).current;
-  const hasPlayedVictoryAnimation = useRef(false);
-  const [shouldStayGreen, setShouldStayGreen] = useState(false);
-  const victoryAnimationInProgress = useRef(false);
 
-  // Memoize the victory animation complete callback to prevent unnecessary re-renders
-  const handleVictoryAnimationComplete = useCallback(() => {
-    if (victoryAnimationInProgress.current) {
-      victoryAnimationInProgress.current = false;
-      // Use setTimeout to defer the state update to avoid scheduling during render
-      setTimeout(() => {
-        setShouldStayGreen(true);
-        onVictoryAnimationComplete && onVictoryAnimationComplete();
-      }, 0);
-    }
-  }, [onVictoryAnimationComplete]);
+  // Spawn animation hook
+  const { hasSpawned, isSpawningNow, setScaleValue } = useSpawnAnimation({
+    shouldSpawn,
+    targetPosition,
+    onSpawnComplete,
+    pan,
+    scale,
+    boxSizeRef,
+  });
 
-  // Handle victory animation with better state management
-  useEffect(() => {
-    if (shouldPlayVictoryAnimation && !hasPlayedVictoryAnimation.current && !victoryAnimationInProgress.current) {
-      hasPlayedVictoryAnimation.current = true;
-      victoryAnimationInProgress.current = true;
-      
-      // Use setTimeout to defer the animation start
-      setTimeout(() => {
-        playWordVictoryAnimation(victoryAnimationValues, handleVictoryAnimationComplete, true);
-      }, 0);
-    }
-  }, [shouldPlayVictoryAnimation, handleVictoryAnimationComplete]);
+  // Victory animation hook
+  const {
+    victoryAnimationValues,
+    shouldStayGreen,
+    setShouldStayGreen,
+  } = useVictoryAnimation({
+    shouldPlayVictoryAnimation,
+    onVictoryAnimationComplete,
+    shouldSpawn,
+  });
 
-  // Reset victory state only when starting a new game
-  useEffect(() => {
-    if (!shouldSpawn && !hasSpawned.current) {
-      // This indicates a new game is starting
-      hasPlayedVictoryAnimation.current = false;
-      victoryAnimationInProgress.current = false;
-      setShouldStayGreen(false);
-      resetVictoryAnimation(victoryAnimationValues, true);
-    }
-  }, [shouldSpawn]);
+  // Lock animation hook
+  const {
+    lockScale,
+    lockRotation,
+    lockOpacity,
+  } = useLockAnimation({ locked, previousLocked, hasSpawned });
 
-  // Handle lock/unlock animations
-  useEffect(() => {
-    if (previousLocked.current !== locked && hasSpawned.current) {
+  // Double tap hook
+  const handleDoubleTap = useDoubleTap({
+    locked,
+    onUnlock,
+  });
+
+  // Handle tap and drag gesture logic
+  const handlePress = useCallback(() => {
+    handleDoubleTap();
+  }, [handleDoubleTap]);
+
+  // PanResponder setup
+  const panResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      return !locked && !isSpawningNow.current && hasSpawned.current &&
+        (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2);
+    },
+    onPanResponderGrant: () => {
       if (locked) {
-        // Locking animation - scale up with slight rotation
-        Animated.parallel([
-          Animated.sequence([
-            Animated.spring(lockScale, {
-              toValue: 1.15,
-              useNativeDriver: false,
-              tension: 200,
-              friction: 8,
-            }),
-            Animated.spring(lockScale, {
-              toValue: 1,
-              useNativeDriver: false,
-              tension: 150,
-              friction: 8,
-            })
-          ]),
-          Animated.sequence([
-            Animated.timing(lockRotation, {
-              toValue: 1,
-              duration: 100,
-              useNativeDriver: false,
-            }),
-            Animated.timing(lockRotation, {
-              toValue: 0,
-              duration: 200,
-              useNativeDriver: false,
-            })
-          ])
-        ]).start();
-      } else {
-        // Unlocking animation - brief flash and scale
-        Animated.parallel([
-          Animated.sequence([
-            Animated.timing(lockOpacity, {
-              toValue: 0.3,
-              duration: 100,
-              useNativeDriver: false,
-            }),
-            Animated.timing(lockOpacity, {
-              toValue: 1,
-              duration: 200,
-              useNativeDriver: false,
-            })
-          ]),
-          Animated.sequence([
-            Animated.spring(lockScale, {
-              toValue: 0.9,
-              useNativeDriver: false,
-              tension: 200,
-              friction: 8,
-            }),
-            Animated.spring(lockScale, {
-              toValue: 1,
-              useNativeDriver: false,
-              tension: 150,
-              friction: 8,
-            })
-          ])
-        ]).start();
+        handlePress();
+        onLockedAttempt && onLockedAttempt();
+        return;
       }
-    }
-    previousLocked.current = locked;
-  }, [locked]);
+      isDragging.current = true;
+      setIsBeingDragged(true);
+      pan.setOffset({ x: pan.x._value, y: pan.y._value });
+      pan.x.setValue(0);
+      pan.y.setValue(0);
+    },
+    onPanResponderMove: (e, gesture) => {
+      if (locked || boxSizeRef.current.width === 0 || boxSizeRef.current.height === 0) return;
 
-  // Handle spawning animation
-  useEffect(() => {
-    if (shouldSpawn && !hasSpawned.current && targetPosition && !isDragging.current) {
-      hasSpawned.current = true;
-      isCurrentlySpawning.current = true;
-      
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1,
-          useNativeDriver: false,
-          tension: ANIMATION.SCALE_TENSION,
-          friction: ANIMATION.SPRING_FRICTION,
-        }),
-        Animated.spring(pan, {
-          toValue: targetPosition,
-          useNativeDriver: false,
-          tension: ANIMATION.SPAWN_TENSION,
-          friction: ANIMATION.SPRING_FRICTION,
-        })
-      ]).start(() => {
-        handleSpawnComplete();
-      });
-    }
-  }, [shouldSpawn, targetPosition]);
+      const constraints = getBoundingConstraints(boxSizeRef.current);
+      const newX = clamp(gesture.dx + pan.x._offset, constraints.minX, constraints.maxX);
+      const newY = clamp(gesture.dy + pan.y._offset, constraints.minY, constraints.maxY);
 
-  const handleSpawnComplete = useCallback(() => {
-    if (boxSizeRef.current.width > 0 && boxSizeRef.current.height > 0) {
+      pan.x.setValue(newX - pan.x._offset);
+      pan.y.setValue(newY - pan.y._offset);
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      if (locked) return;
+
+      if (Math.abs(gestureState.dx) < 2 && Math.abs(gestureState.dy) < 2) {
+        handlePress();
+      }
+
+      pan.flattenOffset();
+      isDragging.current = false;
+      setIsBeingDragged(false);
+
+      if (boxSizeRef.current.width === 0 || boxSizeRef.current.height === 0) return;
+
+      const currentX = pan.x._value;
+      const currentY = pan.y._value;
       const constraints = getBoundingConstraints(boxSizeRef.current);
       const validYPositions = getValidYPositions(boxSizeRef.current.height);
-      
-      const clampedX = clamp(targetPosition.x, constraints.minX, constraints.maxX);
-      const snappedY = snapToRow(targetPosition.y, validYPositions);
+
+      const snappedY = snapToRow(currentY, validYPositions);
+      const clampedX = clamp(currentX, constraints.minX, constraints.maxX);
       const clampedY = clamp(snappedY, constraints.minY, constraints.maxY);
 
-      pan.setValue({ x: clampedX, y: clampedY });
-      isCurrentlySpawning.current = false;
-      scale.setValue(1);
-      
-      onSpawnComplete && onSpawnComplete(clampedX, clampedY, boxSizeRef.current);
-    }
-  }, [targetPosition, onSpawnComplete, pan, scale]);
+      onDragEnd && onDragEnd(clampedX, clampedY, boxSizeRef.current);
 
-  // Set scale for already spawned words
-  useEffect(() => {
-    if (!shouldSpawn && hasSpawned.current) {
-      scale.setValue(1);
-    }
-  }, [shouldSpawn]);
+      const shouldAnimateY = Math.abs(currentY - clampedY) > 5;
 
-  // Update position when initialPosition changes (for overlap resolution)
+      if (shouldAnimateY) {
+        Animated.parallel([
+          Animated.spring(pan.x, {
+            toValue: clampedX,
+            useNativeDriver: true,
+            tension: ANIMATION.SPRING_TENSION,
+            friction: ANIMATION.SPRING_FRICTION,
+          }),
+          Animated.spring(pan.y, {
+            toValue: clampedY,
+            useNativeDriver: true,
+            tension: ANIMATION.SPRING_TENSION,
+            friction: ANIMATION.SPRING_FRICTION,
+          }),
+        ]).start();
+      } else {
+        pan.x.setValue(clampedX);
+        pan.y.setValue(clampedY);
+      }
+    },
+  }), [locked, onLockedAttempt, onDragEnd, pan, handlePress, isSpawningNow, hasSpawned]);
+
+  // Sync position if initialPosition changes (for overlap fixes)
   useEffect(() => {
     if (!isDragging.current && !isSpawning && hasSpawned.current) {
       const currentX = pan.x._value;
       const currentY = pan.y._value;
       const targetX = initialPosition.x;
       const targetY = initialPosition.y;
-      
+
       if (Math.abs(currentX - targetX) > 1 || Math.abs(currentY - targetY) > 1) {
-        Animated.spring(pan, {
-          toValue: initialPosition,
-          useNativeDriver: false,
-          tension: ANIMATION.SPRING_TENSION,
-          friction: ANIMATION.SPRING_FRICTION,
-        }).start();
-      } else {
-        pan.setValue(initialPosition);
-      }
-    }
-  }, [initialPosition, isSpawning, pan]);
-
-  const handleDoubleTap = useCallback(() => {
-    if (locked && onUnlock) {
-      onUnlock();
-    }
-  }, [locked, onUnlock]);
-
-  const handlePress = useCallback(() => {
-    const now = Date.now();
-    const timeSinceLastTap = now - lastTapRef.current;
-    
-    if (timeSinceLastTap < 300) { // Double tap detected
-      if (tapTimeoutRef.current) {
-        clearTimeout(tapTimeoutRef.current);
-        tapTimeoutRef.current = null;
-      }
-      handleDoubleTap();
-    } else {
-      // Single tap - wait to see if there's a second tap
-      tapTimeoutRef.current = setTimeout(() => {
-        tapTimeoutRef.current = null;
-        // Handle single tap if needed
-      }, 300);
-    }
-    
-    lastTapRef.current = now;
-  }, [handleDoubleTap]);
-
-  const panResponder = useMemo(() => 
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only set pan responder for movement if not locked and actually moving
-        return !locked && !isCurrentlySpawning.current && hasSpawned.current && 
-               (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2);
-      },
-
-      onPanResponderGrant: (evt) => {
-        if (locked) {
-          handlePress();
-          onLockedAttempt && onLockedAttempt();
-          return;
-        }
-      
-        isDragging.current = true;
-        setIsBeingDragged(true);
-        pan.setOffset({ x: pan.x._value, y: pan.y._value });
-        pan.setValue({ x: 0, y: 0 });
-      },
-      
-      
-      onPanResponderMove: (e, gesture) => {
-        if (locked || boxSizeRef.current.width === 0 || boxSizeRef.current.height === 0) return;
-      
-        const constraints = getBoundingConstraints(boxSizeRef.current);
-        const newX = clamp(gesture.dx + pan.x._offset, constraints.minX, constraints.maxX);
-        const newY = clamp(gesture.dy + pan.y._offset, constraints.minY, constraints.maxY);
-      
-        pan.setValue({ x: newX - pan.x._offset, y: newY - pan.y._offset });
-      },
-
-      onPanResponderRelease: (evt, gestureState) => {
-        if (locked) return;
-
-        // If minimal movement, treat as tap
-        if (Math.abs(gestureState.dx) < 2 && Math.abs(gestureState.dy) < 2) {
-          handlePress();
-        }
-
-        pan.flattenOffset();
-        isDragging.current = false;
-        setIsBeingDragged(false);
-      
-        if (boxSizeRef.current.width === 0 || boxSizeRef.current.height === 0) return;
-      
-        const currentX = pan.x._value;
-        const currentY = pan.y._value;
-        const constraints = getBoundingConstraints(boxSizeRef.current);
-        const validYPositions = getValidYPositions(boxSizeRef.current.height);
-      
-        const snappedY = snapToRow(currentY, validYPositions);
-        const clampedX = clamp(currentX, constraints.minX, constraints.maxX);
-        const clampedY = clamp(snappedY, constraints.minY, constraints.maxY);
-      
-        // Immediately notify
-        onDragEnd && onDragEnd(clampedX, clampedY, boxSizeRef.current);
-      
-        const shouldAnimateY = Math.abs(currentY - clampedY) > 5;
-      
-        if (shouldAnimateY) {
-          Animated.spring(pan, {
-            toValue: { x: clampedX, y: clampedY },
-            useNativeDriver: false,
+        Animated.parallel([
+          Animated.spring(pan.x, {
+            toValue: targetX,
+            useNativeDriver: true,
             tension: ANIMATION.SPRING_TENSION,
             friction: ANIMATION.SPRING_FRICTION,
-          }).start();
-        } else {
-          pan.setValue({ x: clampedX, y: clampedY });
-        }
-      },
-    }),
-    [locked, onLockedAttempt, onDragEnd, pan, scale, handlePress]
-  );
+          }),
+          Animated.spring(pan.y, {
+            toValue: targetY,
+            useNativeDriver: true,
+            tension: ANIMATION.SPRING_TENSION,
+            friction: ANIMATION.SPRING_FRICTION,
+          }),
+        ]).start();
+      } else {
+        pan.x.setValue(targetX);
+        pan.y.setValue(targetY);
+      }
+    }
+  }, [initialPosition, isSpawning, pan, hasSpawned]);
 
-  // Calculate rotation interpolation
+  // Style calculations
   const rotationInterpolation = lockRotation.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '2deg']
+    outputRange: ['0deg', '2deg'],
   });
 
-  // Calculate victory highlight background color
   const victoryBackgroundColor = victoryAnimationValues.victoryHighlight.interpolate({
     inputRange: [0, 1],
-    outputRange: ['transparent', '#4CAF50'] // Green highlight
+    outputRange: ['transparent', '#4CAF50'], // Green highlight
   });
 
-  // Determine background color priority - memoized to prevent unnecessary re-renders
   const backgroundColor = useMemo(() => {
-    if (shouldStayGreen || shouldPlayVictoryAnimation) {
-      return victoryBackgroundColor;
-    }
-    if (locked) {
-      return '#4CAF50';
-    }
-    if (adjacentToCorrect && !locked) {
-      return '#FFEB3B';
-    }
+    if (shouldStayGreen || shouldPlayVictoryAnimation) return victoryBackgroundColor;
+    if (locked) return '#4CAF50';
+    if (adjacentToCorrect && !locked) return '#FFEB3B';
     return '#ddd';
   }, [shouldStayGreen, shouldPlayVictoryAnimation, locked, adjacentToCorrect, victoryBackgroundColor]);
 
@@ -365,17 +207,18 @@ export default function DraggableWord({
         styles.wordContainer,
         isBeingDragged && styles.wordContainerDragging,
         locked && styles.lockedWord,
-        adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord, // Only show yellow if not green
-        pan.getLayout(),
+        adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord,
         {
           transform: [
+            { translateX: pan.x },
+            { translateY: pan.y },
             { scale: scale },
             { scale: lockScale },
-            { scale: victoryAnimationValues.victoryScale }, // Victory animation scale
-            { rotate: rotationInterpolation }
+            { scale: victoryAnimationValues.victoryScale },
+            { rotate: rotationInterpolation },
           ],
           opacity: lockOpacity,
-          backgroundColor: backgroundColor
+          backgroundColor,
         }
       ]}
       {...panResponder.panHandlers}
@@ -383,12 +226,8 @@ export default function DraggableWord({
         const { width, height } = event.nativeEvent.layout;
         boxSizeRef.current = { width, height };
       }}
-      
     >
-      {correctIndexTag != null && (
-        <Text style={styles.indexBadge}>{correctIndexTag}</Text>
-      )}
-
+      {correctIndexTag != null && <Text style={styles.indexBadge}>{correctIndexTag}</Text>}
       <Text style={styles.wordText}>{word}</Text>
     </Animated.View>
   );
@@ -404,10 +243,7 @@ const styles = StyleSheet.create({
   wordContainerDragging: {
     backgroundColor: '#bbb',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
@@ -420,7 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   adjacentWord: {
-    backgroundColor: '#FFEB3B', // Material yellow
+    backgroundColor: '#FFEB3B',
   },
   indexBadge: {
     position: 'absolute',
@@ -435,10 +271,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     zIndex: 10,
     minWidth: 24,
-    height: 16,                 // ✅ Set fixed height
-    lineHeight: 16,             // ✅ Match height exactly
+    height: 16,
+    lineHeight: 16,
     textAlign: 'center',
-    includeFontPadding: false,  // ✅ Prevent extra vertical padding on Android
-    textAlignVertical: 'center',// ✅ Android vertical center (has no effect on iOS)
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 });
