@@ -64,7 +64,7 @@ export default function DraggableWord({
   // Lock animation hook
   const {
     lockScale,
-    lockRotation,
+    rotate,
     lockOpacity,
   } = useLockAnimation({ locked, previousLocked, hasSpawned });
 
@@ -81,7 +81,9 @@ export default function DraggableWord({
 
   // PanResponder setup
   const panResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => false,
+
+    //prevent taps for unlocked words (locked is boolean here)
+    onStartShouldSetPanResponder: () => locked, 
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       return !locked && !isSpawningNow.current && hasSpawned.current &&
         (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2);
@@ -187,7 +189,7 @@ export default function DraggableWord({
   }, [initialPosition, isSpawning, pan, hasSpawned]);
 
   // Style calculations
-  const rotationInterpolation = lockRotation.interpolate({
+  const rotationInterpolation = rotate.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '2deg'],
   });
@@ -215,10 +217,10 @@ const computedBackgroundColor = useMemo(() => {
       transform: [
         { translateX: pan.x },
         { translateY: pan.y },
-        { scale: scale },
-        { scale: lockScale },
-        { scale: victoryAnimationValues.victoryScale },
-        { rotate: rotationInterpolation },
+        { scale: scale }, // spawn scale
+        { scale: lockScale }, // lock animation
+        { scale: victoryAnimationValues.victoryScale }, // victory animation
+        { rotate: rotate }, // from useLockAnimation
       ],
       opacity: lockOpacity,
       backgroundColor: isBeingDragged
