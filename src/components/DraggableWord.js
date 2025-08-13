@@ -1,3 +1,5 @@
+//draggableword.js
+
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Animated,
@@ -46,6 +48,7 @@ export default function DraggableWord({
     scale,
     boxSizeRef,
   });
+  
 
   // Victory animation hook
   const {
@@ -78,7 +81,7 @@ export default function DraggableWord({
 
   // PanResponder setup
   const panResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       return !locked && !isSpawningNow.current && hasSpawned.current &&
         (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2);
@@ -194,42 +197,57 @@ export default function DraggableWord({
     outputRange: ['transparent', '#4CAF50'], // Green highlight
   });
 
-  const backgroundColor = useMemo(() => {
-    if (shouldStayGreen || shouldPlayVictoryAnimation) return victoryBackgroundColor;
-    if (locked) return '#4CAF50';
-    if (adjacentToCorrect && !locked) return '#FFEB3B';
-    return '#ddd';
-  }, [shouldStayGreen, shouldPlayVictoryAnimation, locked, adjacentToCorrect, victoryBackgroundColor]);
+const computedBackgroundColor = useMemo(() => {
+  if (shouldStayGreen || shouldPlayVictoryAnimation) return victoryBackgroundColor;
+  if (locked) return '#4CAF50';
+  if (adjacentToCorrect && !locked) return '#FFEB3B';
+  if (isBeingDragged) return '#bbb'; // <-- darken while dragging
+  return '#ddd';
+}, [shouldStayGreen, shouldPlayVictoryAnimation, locked, adjacentToCorrect, victoryBackgroundColor, isBeingDragged]);
 
   return (
-    <Animated.View
-      style={[
-        styles.wordContainer,
-        isBeingDragged && styles.wordContainerDragging,
-        locked && styles.lockedWord,
-        adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord,
-        {
-          transform: [
-            { translateX: pan.x },
-            { translateY: pan.y },
-            { scale: scale },
-            { scale: lockScale },
-            { scale: victoryAnimationValues.victoryScale },
-            { rotate: rotationInterpolation },
-          ],
-          opacity: lockOpacity,
-          backgroundColor,
-        }
-      ]}
-      {...panResponder.panHandlers}
-      onLayout={event => {
-        const { width, height } = event.nativeEvent.layout;
-        boxSizeRef.current = { width, height };
-      }}
-    >
-      {correctIndexTag != null && <Text style={styles.indexBadge}>{correctIndexTag}</Text>}
-      <Text style={styles.wordText}>{word}</Text>
-    </Animated.View>
+<Animated.View
+  style={[
+    styles.wordContainer,
+    locked && styles.lockedWord,
+    adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord,
+    {
+      transform: [
+        { translateX: pan.x },
+        { translateY: pan.y },
+        { scale: scale },
+        { scale: lockScale },
+        { scale: victoryAnimationValues.victoryScale },
+        { rotate: rotationInterpolation },
+      ],
+      opacity: lockOpacity,
+      backgroundColor: isBeingDragged
+        ? '#bbb' // darken when dragging
+        : shouldStayGreen || shouldPlayVictoryAnimation
+        ? victoryBackgroundColor
+        : locked
+        ? '#4CAF50'
+        : adjacentToCorrect && !locked
+        ? '#FFEB3B'
+        : '#ddd',
+      // optionally keep shadows/elevation when dragging
+      shadowColor: isBeingDragged ? '#000' : undefined,
+      shadowOffset: isBeingDragged ? { width: 0, height: 4 } : undefined,
+      shadowOpacity: isBeingDragged ? 0.3 : undefined,
+      shadowRadius: isBeingDragged ? 6 : undefined,
+      elevation: isBeingDragged ? 8 : undefined,
+    },
+  ]}
+  {...panResponder.panHandlers}
+  onLayout={event => {
+    const { width, height } = event.nativeEvent.layout;
+    boxSizeRef.current = { width, height };
+  }}
+>
+  {correctIndexTag != null && <Text style={styles.indexBadge}>{correctIndexTag}</Text>}
+  <Text style={styles.wordText}>{word}</Text>
+</Animated.View>
+
   );
 }
 
