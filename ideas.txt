@@ -59,3 +59,5 @@ https://en.wikipedia.org/wiki/2022_in_public_domain
 
 one or two or three free puzzle packs and the rest are paid.
 make it say quotes on the homepage like in the premium pitch
+
+TO DO, DO THE THING IN CHATGPT TO FIX ANIMATION SLOWNESS
