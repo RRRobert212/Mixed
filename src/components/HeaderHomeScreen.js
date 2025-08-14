@@ -1,23 +1,12 @@
-// src/components/HeaderGameScreen.js
+// src/components/HeaderHomeScreen.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; // or 'react-native-vector-icons/Ionicons'
 
-export default function HeaderGameScreen({ navigation }) {
+export default function HeaderHomeScreen({ navigation }) {
   return (
     <View style={styles.header}>
-      {/* Back button */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Home')} 
-        style={[styles.backButton, {padding: 12}]}
-      >
-        <Ionicons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
-
-      {/* Title */}
       <Text style={styles.title}>Title</Text>
-
-      {/* Info and Settings icons */}
       <View style={styles.icons}>
         <TouchableOpacity onPress={() => navigation.navigate('Info')}>
           <Ionicons name="information-circle-outline" size={24} color="black" />
@@ -37,7 +26,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    backgroundColor: '#fffbf1ff',
+    backgroundColor: '#fffae9',
   },
   title: {
     fontSize: 32,
@@ -47,13 +36,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: 'center',
-    marginTop: 30,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    marginTop: 30,
-    zIndex: 1,
+    marginTop: 30
   },
   icons: {
     position: 'absolute',

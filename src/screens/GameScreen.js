@@ -1,5 +1,4 @@
-// GameScreen.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import DraggableWord from '../components/DraggableWord';
 import { 
@@ -13,24 +12,16 @@ import {
   generateSpawnOrder, 
   createInitialPositions 
 } from '../utils/spawnUtils';
-import { LAYOUT, ANIMATION, MAX_SUBMITS, MAX_HINTS } from '../utils/constants';
+import { LAYOUT, ANIMATION, MAX_SUBMITS } from '../utils/constants';
 import { getRandomQuote } from '../utils/QuoteService';
-import { verifyOrder } from '../utils/verification';
+import { verifyOrder, evaluateWordPositions } from '../utils/verification';
 
 import Timer from '../components/Timer';
 import SubmitButton from '../components/SubmitButton';
-import HintButton from '../components/HintButton';
-
-import { evaluateWordPositions } from '../utils/verification';
-
 import ConnectionLines from '../components/ConnectionLines';
-
 import VictoryScreen from '../screens/VictoryScreen';
 
-// Import victory animation
-import { playVictoryAnimation } from '../utils/victoryAnimation';
-
-export default function GameScreen() {
+export default function GameScreen( {navigation}) {
   const [wordPositions, setWordPositions] = useState([]);
   const [spawnedWords, setSpawnedWords] = useState(0);
   const [isSpawning, setIsSpawning] = useState(true);
@@ -42,33 +33,31 @@ export default function GameScreen() {
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
 
-  const [showHintMessage, setShowHintMessage] = useState(false);
-  const hintMessageOpacity = useRef(new Animated.Value(0)).current;
-  const lastHintMessageTime = useRef(0);
-
   const [connections, setConnections] = useState([]);
   const [persistentConnections, setPersistentConnections] = useState([]);
 
   const [remainingSubmits, setRemainingSubmits] = useState(MAX_SUBMITS);
-  const [remainingHints, setRemainingHints] = useState(MAX_HINTS);
-
   const [hasWon, setHasWon] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
 
-  // New state for current quote
   const [currentQuote, setCurrentQuote] = useState(null);
-
-  // Victory animation state
-  const [isPlayingVictoryAnimation, setIsPlayingVictoryAnimation] = useState(false);
-  const [victoryAnimatingWords, setVictoryAnimatingWords] = useState(new Set());
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
 
-  function updatePosition(index, newX, newY, boxSize) {
+  //submitbutton is locked at start, unlocks after spawn
+  const [submitLocked, setSubmitLocked] = useState(true);
+  const [submitText, setSubmitText] = useState(`Submit (${remainingSubmits})`);
+
+  const currentSubmitText = hasWon 
+    ? submitText        // animated "Congratulations!" after win
+    : `Submit (${remainingSubmits})`;
+  const submitScale = useRef(new Animated.Value(1)).current;
+
+
+
+  const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
       const currentPos = currentPositions[index];
-      if (currentPos && 
-          Math.abs(currentPos.x - newX) < 1 && 
-          Math.abs(currentPos.y - newY) < 1) {
+      if (currentPos && Math.abs(currentPos.x - newX) < 1 && Math.abs(currentPos.y - newY) < 1) {
         return currentPositions;
       }
 
@@ -86,10 +75,8 @@ export default function GameScreen() {
       const others = newPositions.filter((_, i) => i !== index);
       const nonOverlapPos = findNearestNonOverlapping(candidatePos, boxSize, others, validYPositions);
 
-      const prev = currentPositions[index];
-
       newPositions[index] = {
-        ...prev,
+        ...currentPositions[index],
         x: nonOverlapPos.x,
         y: nonOverlapPos.y,
         width: boxSize.width,
@@ -104,18 +91,17 @@ export default function GameScreen() {
 
       return newPositions;
     });
-  }
+  }, []);
 
-  function handleSpawnComplete(index, finalX, finalY, boxSize) {
+  const handleSpawnComplete = useCallback((index, finalX, finalY, boxSize) => {
     updatePosition(index, finalX, finalY, boxSize);
-  }
+  }, [updatePosition]);
 
   useEffect(() => {
     initializeGame();
   }, []);
 
-  const initializeGame = () => {
-    // Get a random quote at the start of each game
+  const initializeGame = useCallback(() => {
     const quote = getRandomQuote();
     setCurrentQuote(quote);
 
@@ -129,30 +115,30 @@ export default function GameScreen() {
     setShowText(false);
     textOpacity.setValue(0);
 
-    // Reset game state
     setRemainingSubmits(MAX_SUBMITS);
-    setRemainingHints(MAX_HINTS);
     setConnections([]);
     setPersistentConnections([]);
 
-    // Reset victory animation state
-    setIsPlayingVictoryAnimation(false);
-    setVictoryAnimatingWords(new Set());
+    setHasWon(false);
+    setFinalStats(null);
     setShowVictoryScreen(false);
 
     startSpawning(quote.words.length);
-  };
+  }, []);
 
-  const startSpawning = (wordCount) => {
+  const startSpawning = useCallback((wordCount) => {
     const spawnInterval = setInterval(() => {
       setSpawnedWords(current => {
         const next = current + 1;
         if (next >= wordCount) {
           clearInterval(spawnInterval);
           setIsSpawning(false);
-
           setHasStarted(true);
-          
+
+          setTimeout(() => {
+            setSubmitLocked(false);
+          }, 1000);
+
           setTimeout(() => {
             setShowText(true);
             Animated.timing(textOpacity, {
@@ -167,147 +153,122 @@ export default function GameScreen() {
     }, ANIMATION.SPAWN_INTERVAL);
 
     return () => clearInterval(spawnInterval);
-  };
+  }, [textOpacity]);
 
-  const getSortedWords = () => {
+  const getSortedWords = useCallback(() => {
     return [...wordPositions]
       .sort((a, b) => {
         const rowA = Math.floor(a.y / LAYOUT.GRID_SIZE);
         const rowB = Math.floor(b.y / LAYOUT.GRID_SIZE);
-        if (rowA === rowB) {
-          return a.x - b.x;
-        }
+        if (rowA === rowB) return a.x - b.x;
         return rowA - rowB;
       })
       .map(p => p.word);
-  };
+  }, [wordPositions]);
 
-  const startVictoryAnimation = () => {
-    setIsPlayingVictoryAnimation(true);
-    
-    // Create positions array for victory animation
-    const positions = wordPositions.map(pos => ({
-      x: pos.x,
-      y: pos.y
-    }));
+const handleSubmit = useCallback(() => {
+  if (submitLocked) {
+    triggerLockedMessage();
+    return;
+  }
 
-    playVictoryAnimation(
-      positions,
-      (wordIndex) => {
-        // Called when each word starts animating
-        setVictoryAnimatingWords(prev => new Set([...prev, wordIndex]));
-      },
-      () => {
-        // Called when all animations complete
-        setIsPlayingVictoryAnimation(false);
-        setVictoryAnimatingWords(new Set());
-        setShowVictoryScreen(true);
-      }
-    );
-  };
+  const nextRemaining = remainingSubmits - 1;
+  setRemainingSubmits(nextRemaining);
 
-  const handleVictoryAnimationComplete = (wordIndex) => {
-    // Called when individual word animation completes
-    setVictoryAnimatingWords(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(wordIndex);
-      return newSet;
-    });
-  };
+  const userAnswer = getSortedWords();
+  const isCorrect = verifyOrder(userAnswer, currentQuote.words);
 
-  function handleSubmit() {
-    if (remainingSubmits <= 0 || !currentQuote) {
-      return;
+  // Evaluate positions and get connections
+  const { updatedPositions, connectedPairs } = evaluateWordPositions(
+    wordPositions,
+    currentQuote.words,
+    LAYOUT
+  );
+  setWordPositions(updatedPositions);
+  setConnections(connectedPairs);
+
+  // Merge new connections into persistentConnections
+  setPersistentConnections(prev => {
+    const hasInbound = new Set(prev.map(pair => pair[1]));
+    const hasOutbound = new Set(prev.map(pair => pair[0]));
+    const newOnes = [];
+
+    for (const [from, to] of connectedPairs) {
+      if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+      if (prev.some(([a, b]) => a === from && b === to)) continue;
+      newOnes.push([from, to]);
+      hasOutbound.add(from);
+      hasInbound.add(to);
     }
 
-    const userAnswer = getSortedWords();
-    const isCorrect = verifyOrder(userAnswer, currentQuote.words);
+    return [...prev, ...newOnes];
+  });
 
-    setRemainingSubmits(prev => prev - 1);
+  if (isCorrect) {
+    // Victory logic
+    setSubmitLocked(true);
 
-    if (isCorrect) {
-      const hintsUsed = MAX_HINTS - remainingHints;
-      const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+    const performance =
+      guessesUsed === 1 ? 'Perfect!' :
+      guessesUsed <= 2 ? 'Excellent!' :
+      guessesUsed <= 3 ? 'Good!' :
+      'A win is a win...';
 
-      const performance =
-        hintsUsed === 0 && guessesUsed === 1
-          ? 'Perfect!'
-          : hintsUsed <= 1 && guessesUsed <= 2
-          ? 'Excellent!'
-          : hintsUsed <= 2 && guessesUsed <= 3
-          ? 'Good!'
-          : 'A win is a win...';
+    setFinalStats({
+      fullQuote: currentQuote.words.join(' '),
+      quoteAttribution: currentQuote.attribution,
+      guessesUsed,
+      performance,
+    });
 
-      setFinalStats({
-        fullQuote: currentQuote.words.join(' '),
-        quoteAttribution: currentQuote.attribution,
-        hintsUsed,
-        guessesUsed,
-        performance,
+    setHasWon(true);
+
+    // Animate submit button and show victory screen
+    setTimeout(() => {
+      Animated.timing(submitScale, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        setSubmitText('Congratulations!');
+        submitScale.setValue(0.5);
+        Animated.spring(submitScale, {
+          toValue: 1,
+          friction: 15,
+          tension: 60,
+          useNativeDriver: true,
+        }).start();
       });
+    }, 150);
 
-      setHasWon(true);
-      
-      // Start victory animation
-      startVictoryAnimation();
-    } else {
-      console.log('WRONG');
+    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1700);
+  } else {
+    // Wrong answer → hint feedback
+    setTimeout(() => {
+      // positions and connections already updated above
+    }, 150);
+
+    // Lock submit if no guesses left
+    if (nextRemaining <= 0) {
+      console.log("OUT OF GUESSES");
+      setSubmitLocked(true);
+      // Optionally show failure screen here
     }
   }
+}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, submitLocked]);
 
-  function handleHint() {
-    if (remainingHints <= 0) {
-      triggerHintMessage();
-      return;
-    }
 
-    if (!currentQuote) return;
 
-    const userAnswer = getSortedWords();
-    const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
-
-    setWordPositions(updatedPositions);
-    setConnections(connectedPairs);
-
-    setPersistentConnections(prev => {
-      const hasInbound = new Set(prev.map(pair => pair[1]));
-      const hasOutbound = new Set(prev.map(pair => pair[0]));
-      const newOnes = [];
-
-      for (const [from, to] of connectedPairs) {
-        if (hasOutbound.has(from) || hasInbound.has(to)) continue;
-        if (prev.some(([a, b]) => a === from && b === to)) continue;
-
-        newOnes.push([from, to]);
-        hasOutbound.add(from);
-        hasInbound.add(to);
-      }
-
-      return [...prev, ...newOnes];
-    });
-
-    setRemainingHints(prev => prev - 1);
-  }
-
-  function handleUnlock(index) {
+  const handleUnlock = useCallback((index) => {
     setWordPositions(prevPositions => {
       if (!prevPositions[index]?.locked) return prevPositions;
-      
-      return prevPositions.map((pos, i) => {
-        if (i === index) {
-          return {
-            ...pos,
-            locked: false
-          };
-        }
-        return pos;
-      });
+      return prevPositions.map((pos, i) => i === index ? { ...pos, locked: false } : pos);
     });
-  }
+  }, []);
 
-  function triggerLockedMessage() {
+  const triggerLockedMessage = useCallback(() => {
     const now = Date.now();
-
     if (showLockedMessage || now - lastLockedMessageTime.current < 3000) return;
 
     lastLockedMessageTime.current = now;
@@ -327,33 +288,9 @@ export default function GameScreen() {
         }).start(() => setShowLockedMessage(false));
       }, 1500);
     });
-  }
+  }, [showLockedMessage, lockedMessageOpacity]);
 
-  function triggerHintMessage() {
-    const now = Date.now();
 
-    if (showHintMessage || now - lastHintMessageTime.current < 3000) return;
-
-    lastHintMessageTime.current = now;
-    setShowHintMessage(true);
-    hintMessageOpacity.setValue(0);
-
-    Animated.timing(hintMessageOpacity, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setTimeout(() => {
-        Animated.timing(hintMessageOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowHintMessage(false));
-      }, 1500);
-    });
-  }
-
-  // Don't render anything until we have a quote
   if (!currentQuote) {
     return (
       <View style={styles.container}>
@@ -364,10 +301,7 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.Text style={[
-        styles.orderText,
-        { opacity: textOpacity }
-      ]}>
+      <Animated.Text style={[styles.orderText, { opacity: textOpacity }]}>
         {getSortedWords().join(' ')}
       </Animated.Text>
 
@@ -393,45 +327,37 @@ export default function GameScreen() {
             onLockedAttempt={triggerLockedMessage}
             adjacentToCorrect={wordPositions[index].adjacentToCorrect}
             correctIndexTag={wordPositions[index].correctIndexTag}
-            // Victory animation props
-            shouldPlayVictoryAnimation={victoryAnimatingWords.has(index)}
-            onVictoryAnimationComplete={() => handleVictoryAnimationComplete(index)}
           />
         ))}
 
       {showLockedMessage && (
-        <Animated.View 
-          pointerEvents="none"
-          style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
+        <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
           <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
         </Animated.View>
       )}
 
-      {showHintMessage && (
-        <Animated.View 
-          pointerEvents="none"
-          style={[styles.lockedMessageContainer, { opacity: hintMessageOpacity }]}>
-          <Text style={styles.lockedMessageText}>No hints remaining</Text>
-        </Animated.View>
-      )}
 
       <View style={styles.bottomRow}>
-        <HintButton onPress={handleHint} remainingHints={remainingHints} />
-        <SubmitButton onPress={handleSubmit} remainingSubmits={remainingSubmits} />
+        <SubmitButton
+          onPress={handleSubmit}
+          isLocked={submitLocked}
+          text={currentSubmitText}
+          scale={submitScale}
+        />
+
       </View>
 
       {hasWon && finalStats && showVictoryScreen && (
         <VictoryScreen
           fullQuote={finalStats.fullQuote}
           quoteAttribution={finalStats.quoteAttribution}
-          hintsUsed={finalStats.hintsUsed}
           guessesUsed={finalStats.guessesUsed}
           performance={finalStats.performance}
           onClose={() => {
-            setHasWon(false);
             setFinalStats(null);
-            initializeGame();
+            setShowVictoryScreen(false);
           }}
+          onGoHome={() => navigation.navigate('Home')}
         />
       )}
     </View>
@@ -439,50 +365,10 @@ export default function GameScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f4f4f4',
-  },
-  orderText: {
-    marginTop: 0,
-    fontSize: 16,
-    fontFamily: 'serif',
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center'
-  },
-  bottomRow: {
-    position: 'absolute',
-    bottom: 65,
-    left: 30,
-    right: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  lockedMessageContainer: {
-    position: 'absolute',
-    top: '45%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  lockedMessageText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 100,
-    color: '#666',
-  },
+  container: { flex: 1, padding: 20,  backgroundColor: '#fffae9', },
+  orderText: { marginTop: 0, fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
+  bottomRow: { position: 'absolute', bottom: 65, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  lockedMessageContainer: { position: 'absolute', top: '45%', left: '10%', right: '10%', backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: 12, borderRadius: 8, alignItems: 'center', zIndex: 100 },
+  lockedMessageText: { color: '#fff', fontSize: 16, fontWeight: '500', textAlign: 'center' },
+  loadingText: { fontSize: 18, textAlign: 'center', marginTop: 100, color: '#666' },
 });

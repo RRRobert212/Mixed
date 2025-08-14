@@ -1,5 +1,5 @@
 // utils/QuoteService.js
-import quotes from '../../assets/quotes.json';
+import quotes from '../../assets/quote-packs/quotes.json';
 
 export function getRandomQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
