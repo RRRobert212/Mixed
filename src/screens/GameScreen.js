@@ -381,7 +381,7 @@ const handleSubmit = useCallback(() => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20,  backgroundColor: '#fffae9', },
-  orderText: { marginTop: 0, fontSize: 16, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
+  orderText: { marginTop: 0, fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
   bottomRow: { position: 'absolute', bottom: 65, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   lockedMessageContainer: { position: 'absolute', top: '45%', left: '10%', right: '10%', backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: 12, borderRadius: 8, alignItems: 'center', zIndex: 100 },
   lockedMessageText: { color: '#fff', fontSize: 16, fontWeight: '500', textAlign: 'center' },
