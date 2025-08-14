@@ -1,5 +1,3 @@
-//draggableword.js
-
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Animated,
@@ -11,7 +9,6 @@ import { clamp, getBoundingConstraints, getValidYPositions, snapToRow } from '..
 import { ANIMATION } from '../utils/constants';
 
 import useSpawnAnimation from '../hooks/useSpawnAnimation';
-import useVictoryAnimation from '../hooks/useVictoryAnimation';
 import useLockAnimation from '../hooks/useLockAnimation';
 import useDoubleTap from '../hooks/useDoubleTap';
 
@@ -28,10 +25,7 @@ export default function DraggableWord({
   onLockedAttempt,
   adjacentToCorrect = false,
   correctIndexTag,
-  shouldPlayVictoryAnimation = false,
-  onVictoryAnimationComplete,
 }) {
-  // Refs & state
   const pan = useRef(new Animated.ValueXY(initialPosition)).current;
   const scale = useRef(new Animated.Value(0)).current;
   const boxSizeRef = useRef({ width: 0, height: 0 });
@@ -39,8 +33,7 @@ export default function DraggableWord({
   const [isBeingDragged, setIsBeingDragged] = useState(false);
   const previousLocked = useRef(locked);
 
-  // Spawn animation hook
-  const { hasSpawned, isSpawningNow, setScaleValue } = useSpawnAnimation({
+  const { hasSpawned, isSpawningNow } = useSpawnAnimation({
     shouldSpawn,
     targetPosition,
     onSpawnComplete,
@@ -48,42 +41,14 @@ export default function DraggableWord({
     scale,
     boxSizeRef,
   });
-  
 
-  // Victory animation hook
-  const {
-    victoryAnimationValues,
-    shouldStayGreen,
-    setShouldStayGreen,
-  } = useVictoryAnimation({
-    shouldPlayVictoryAnimation,
-    onVictoryAnimationComplete,
-    shouldSpawn,
-  });
+  const { lockScale, rotate, lockOpacity } = useLockAnimation({ locked, previousLocked, hasSpawned });
 
-  // Lock animation hook
-  const {
-    lockScale,
-    rotate,
-    lockOpacity,
-  } = useLockAnimation({ locked, previousLocked, hasSpawned });
+  const handleDoubleTap = useDoubleTap({ locked, onUnlock });
+  const handlePress = useCallback(() => handleDoubleTap(), [handleDoubleTap]);
 
-  // Double tap hook
-  const handleDoubleTap = useDoubleTap({
-    locked,
-    onUnlock,
-  });
-
-  // Handle tap and drag gesture logic
-  const handlePress = useCallback(() => {
-    handleDoubleTap();
-  }, [handleDoubleTap]);
-
-  // PanResponder setup
   const panResponder = useMemo(() => PanResponder.create({
-
-    //prevent taps for unlocked words (locked is boolean here)
-    onStartShouldSetPanResponder: () => locked, 
+    onStartShouldSetPanResponder: () => locked,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       return !locked && !isSpawningNow.current && hasSpawned.current &&
         (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2);
@@ -102,20 +67,15 @@ export default function DraggableWord({
     },
     onPanResponderMove: (e, gesture) => {
       if (locked || boxSizeRef.current.width === 0 || boxSizeRef.current.height === 0) return;
-
       const constraints = getBoundingConstraints(boxSizeRef.current);
       const newX = clamp(gesture.dx + pan.x._offset, constraints.minX, constraints.maxX);
       const newY = clamp(gesture.dy + pan.y._offset, constraints.minY, constraints.maxY);
-
       pan.x.setValue(newX - pan.x._offset);
       pan.y.setValue(newY - pan.y._offset);
     },
     onPanResponderRelease: (evt, gestureState) => {
       if (locked) return;
-
-      if (Math.abs(gestureState.dx) < 2 && Math.abs(gestureState.dy) < 2) {
-        handlePress();
-      }
+      if (Math.abs(gestureState.dx) < 2 && Math.abs(gestureState.dy) < 2) handlePress();
 
       pan.flattenOffset();
       isDragging.current = false;
@@ -135,7 +95,6 @@ export default function DraggableWord({
       onDragEnd && onDragEnd(clampedX, clampedY, boxSizeRef.current);
 
       const shouldAnimateY = Math.abs(currentY - clampedY) > 5;
-
       if (shouldAnimateY) {
         Animated.parallel([
           Animated.spring(pan.x, {
@@ -158,7 +117,6 @@ export default function DraggableWord({
     },
   }), [locked, onLockedAttempt, onDragEnd, pan, handlePress, isSpawningNow, hasSpawned]);
 
-  // Sync position if initialPosition changes (for overlap fixes)
   useEffect(() => {
     if (!isDragging.current && !isSpawning && hasSpawned.current) {
       const currentX = pan.x._value;
@@ -188,68 +146,48 @@ export default function DraggableWord({
     }
   }, [initialPosition, isSpawning, pan, hasSpawned]);
 
-  // Style calculations
   const rotationInterpolation = rotate.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '2deg'],
   });
 
-  const victoryBackgroundColor = victoryAnimationValues.victoryHighlight.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['transparent', '#4CAF50'], // Green highlight
-  });
-
-const computedBackgroundColor = useMemo(() => {
-  if (shouldStayGreen || shouldPlayVictoryAnimation) return victoryBackgroundColor;
-  if (locked) return '#4CAF50';
-  if (adjacentToCorrect && !locked) return '#FFEB3B';
-  if (isBeingDragged) return '#bbb'; // <-- darken while dragging
-  return '#ddd';
-}, [shouldStayGreen, shouldPlayVictoryAnimation, locked, adjacentToCorrect, victoryBackgroundColor, isBeingDragged]);
+  const computedBackgroundColor = useMemo(() => {
+    if (locked) return '#4CAF50';
+    if (adjacentToCorrect && !locked) return '#FFEB3B';
+    if (isBeingDragged) return '#bbb';
+    return '#ddd';
+  }, [locked, adjacentToCorrect, isBeingDragged]);
 
   return (
-<Animated.View
-  style={[
-    styles.wordContainer,
-    locked && styles.lockedWord,
-    adjacentToCorrect && !locked && !shouldStayGreen && styles.adjacentWord,
-    {
-      transform: [
-        { translateX: pan.x },
-        { translateY: pan.y },
-        { scale: scale }, // spawn scale
-        { scale: lockScale }, // lock animation
-        { scale: victoryAnimationValues.victoryScale }, // victory animation
-        { rotate: rotate }, // from useLockAnimation
-      ],
-      opacity: lockOpacity,
-      backgroundColor: isBeingDragged
-        ? '#bbb' // darken when dragging
-        : shouldStayGreen || shouldPlayVictoryAnimation
-        ? victoryBackgroundColor
-        : locked
-        ? '#4CAF50'
-        : adjacentToCorrect && !locked
-        ? '#FFEB3B'
-        : '#ddd',
-      // optionally keep shadows/elevation when dragging
-      shadowColor: isBeingDragged ? '#000' : undefined,
-      shadowOffset: isBeingDragged ? { width: 0, height: 4 } : undefined,
-      shadowOpacity: isBeingDragged ? 0.3 : undefined,
-      shadowRadius: isBeingDragged ? 6 : undefined,
-      elevation: isBeingDragged ? 8 : undefined,
-    },
-  ]}
-  {...panResponder.panHandlers}
-  onLayout={event => {
-    const { width, height } = event.nativeEvent.layout;
-    boxSizeRef.current = { width, height };
-  }}
->
-  {correctIndexTag != null && <Text style={styles.indexBadge}>{correctIndexTag}</Text>}
-  <Text style={styles.wordText}>{word}</Text>
-</Animated.View>
-
+    <Animated.View
+      style={[
+        styles.wordContainer,
+        {
+          transform: [
+            { translateX: pan.x },
+            { translateY: pan.y },
+            { scale: scale },
+            { scale: lockScale },
+            { rotate: rotate },
+          ],
+          opacity: lockOpacity,
+          backgroundColor: computedBackgroundColor,
+          shadowColor: isBeingDragged ? '#000' : undefined,
+          shadowOffset: isBeingDragged ? { width: 0, height: 4 } : undefined,
+          shadowOpacity: isBeingDragged ? 0.3 : undefined,
+          shadowRadius: isBeingDragged ? 6 : undefined,
+          elevation: isBeingDragged ? 8 : undefined,
+        },
+      ]}
+      {...panResponder.panHandlers}
+      onLayout={event => {
+        const { width, height } = event.nativeEvent.layout;
+        boxSizeRef.current = { width, height };
+      }}
+    >
+      {correctIndexTag != null && <Text style={styles.indexBadge}>{correctIndexTag}</Text>}
+      <Text style={styles.wordText}>{word}</Text>
+    </Animated.View>
   );
 }
 
@@ -260,23 +198,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
   },
-  wordContainerDragging: {
-    backgroundColor: '#bbb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-  },
   wordText: {
     fontSize: 18,
     fontFamily: 'serif',
-  },
-  lockedWord: {
-    backgroundColor: '#4CAF50',
-  },
-  adjacentWord: {
-    backgroundColor: '#FFEB3B',
   },
   indexBadge: {
     position: 'absolute',

@@ -1,4 +1,3 @@
-// GameScreen.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import DraggableWord from '../components/DraggableWord';
@@ -15,20 +14,13 @@ import {
 } from '../utils/spawnUtils';
 import { LAYOUT, ANIMATION, MAX_SUBMITS, MAX_HINTS } from '../utils/constants';
 import { getRandomQuote } from '../utils/QuoteService';
-import { verifyOrder } from '../utils/verification';
+import { verifyOrder, evaluateWordPositions } from '../utils/verification';
 
 import Timer from '../components/Timer';
 import SubmitButton from '../components/SubmitButton';
 import HintButton from '../components/HintButton';
-
-import { evaluateWordPositions } from '../utils/verification';
-
 import ConnectionLines from '../components/ConnectionLines';
-
 import VictoryScreen from '../screens/VictoryScreen';
-
-// Import victory animation
-import { playVictoryAnimation } from '../utils/victoryAnimation';
 
 export default function GameScreen() {
   const [wordPositions, setWordPositions] = useState([]);
@@ -55,22 +47,13 @@ export default function GameScreen() {
   const [hasWon, setHasWon] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
 
-  // New state for current quote
   const [currentQuote, setCurrentQuote] = useState(null);
-
-  // Victory animation state
-  const [isPlayingVictoryAnimation, setIsPlayingVictoryAnimation] = useState(false);
-  const [victoryAnimatingWords, setVictoryAnimatingWords] = useState(new Set());
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
-  const victoryAnimationInProgress = useRef(false);
-  const completedVictoryAnimations = useRef(new Set());
 
   const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
       const currentPos = currentPositions[index];
-      if (currentPos && 
-          Math.abs(currentPos.x - newX) < 1 && 
-          Math.abs(currentPos.y - newY) < 1) {
+      if (currentPos && Math.abs(currentPos.x - newX) < 1 && Math.abs(currentPos.y - newY) < 1) {
         return currentPositions;
       }
 
@@ -88,10 +71,8 @@ export default function GameScreen() {
       const others = newPositions.filter((_, i) => i !== index);
       const nonOverlapPos = findNearestNonOverlapping(candidatePos, boxSize, others, validYPositions);
 
-      const prev = currentPositions[index];
-
       newPositions[index] = {
-        ...prev,
+        ...currentPositions[index],
         x: nonOverlapPos.x,
         y: nonOverlapPos.y,
         width: boxSize.width,
@@ -117,7 +98,6 @@ export default function GameScreen() {
   }, []);
 
   const initializeGame = useCallback(() => {
-    // Get a random quote at the start of each game
     const quote = getRandomQuote();
     setCurrentQuote(quote);
 
@@ -131,18 +111,14 @@ export default function GameScreen() {
     setShowText(false);
     textOpacity.setValue(0);
 
-    // Reset game state
     setRemainingSubmits(MAX_SUBMITS);
     setRemainingHints(MAX_HINTS);
     setConnections([]);
     setPersistentConnections([]);
 
-    // Reset victory animation state
-    setIsPlayingVictoryAnimation(false);
-    setVictoryAnimatingWords(new Set());
+    setHasWon(false);
+    setFinalStats(null);
     setShowVictoryScreen(false);
-    victoryAnimationInProgress.current = false;
-    completedVictoryAnimations.current = new Set();
 
     startSpawning(quote.words.length);
   }, []);
@@ -154,9 +130,8 @@ export default function GameScreen() {
         if (next >= wordCount) {
           clearInterval(spawnInterval);
           setIsSpawning(false);
-
           setHasStarted(true);
-          
+
           setTimeout(() => {
             setShowText(true);
             Animated.timing(textOpacity, {
@@ -178,67 +153,17 @@ export default function GameScreen() {
       .sort((a, b) => {
         const rowA = Math.floor(a.y / LAYOUT.GRID_SIZE);
         const rowB = Math.floor(b.y / LAYOUT.GRID_SIZE);
-        if (rowA === rowB) {
-          return a.x - b.x;
-        }
+        if (rowA === rowB) return a.x - b.x;
         return rowA - rowB;
       })
       .map(p => p.word);
   }, [wordPositions]);
 
-  const startVictoryAnimation = useCallback(() => {
-    if (victoryAnimationInProgress.current) return;
-    
-    victoryAnimationInProgress.current = true;
-    setIsPlayingVictoryAnimation(true);
-    completedVictoryAnimations.current = new Set();
-    
-    // Create positions array for victory animation
-    const positions = wordPositions.map(pos => ({
-      x: pos.x,
-      y: pos.y
-    }));
-
-    playVictoryAnimation(
-      positions,
-      (wordIndex) => {
-        // Called when each word starts animating
-        setVictoryAnimatingWords(prev => new Set([...prev, wordIndex]));
-      },
-      () => {
-        // Called when all animations complete
-        setTimeout(() => {
-          setIsPlayingVictoryAnimation(false);
-          setVictoryAnimatingWords(new Set());
-          setShowVictoryScreen(true);
-          victoryAnimationInProgress.current = false;
-        }, 100); // Small delay to ensure all state updates are complete
-      }
-    );
-  }, [wordPositions]);
-
-  const handleVictoryAnimationComplete = useCallback((wordIndex) => {
-    // Called when individual word animation completes
-    completedVictoryAnimations.current.add(wordIndex);
-    
-    // Use setTimeout to defer state update
-    setTimeout(() => {
-      setVictoryAnimatingWords(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(wordIndex);
-        return newSet;
-      });
-    }, 0);
-  }, []);
-
   const handleSubmit = useCallback(() => {
-    if (remainingSubmits <= 0 || !currentQuote || victoryAnimationInProgress.current) {
-      return;
-    }
+    if (remainingSubmits <= 0 || !currentQuote || hasWon) return;
 
     const userAnswer = getSortedWords();
     const isCorrect = verifyOrder(userAnswer, currentQuote.words);
-
     setRemainingSubmits(prev => prev - 1);
 
     if (isCorrect) {
@@ -263,15 +188,11 @@ export default function GameScreen() {
       });
 
       setHasWon(true);
-      
-      // Defer victory animation start
-      setTimeout(() => {
-        startVictoryAnimation();
-      }, 100);
-    } else {
-      console.log('WRONG');
+
+      // Delayed victory screen
+      setTimeout(() => setShowVictoryScreen(true), 1000);
     }
-  }, [remainingSubmits, currentQuote, getSortedWords, remainingHints, startVictoryAnimation]);
+  }, [remainingSubmits, currentQuote, getSortedWords, remainingHints, hasWon]);
 
   const handleHint = useCallback(() => {
     if (remainingHints <= 0) {
@@ -310,22 +231,12 @@ export default function GameScreen() {
   const handleUnlock = useCallback((index) => {
     setWordPositions(prevPositions => {
       if (!prevPositions[index]?.locked) return prevPositions;
-      
-      return prevPositions.map((pos, i) => {
-        if (i === index) {
-          return {
-            ...pos,
-            locked: false
-          };
-        }
-        return pos;
-      });
+      return prevPositions.map((pos, i) => i === index ? { ...pos, locked: false } : pos);
     });
   }, []);
 
   const triggerLockedMessage = useCallback(() => {
     const now = Date.now();
-
     if (showLockedMessage || now - lastLockedMessageTime.current < 3000) return;
 
     lastLockedMessageTime.current = now;
@@ -349,7 +260,6 @@ export default function GameScreen() {
 
   const triggerHintMessage = useCallback(() => {
     const now = Date.now();
-
     if (showHintMessage || now - lastHintMessageTime.current < 3000) return;
 
     lastHintMessageTime.current = now;
@@ -371,7 +281,6 @@ export default function GameScreen() {
     });
   }, [showHintMessage, hintMessageOpacity]);
 
-  // Don't render anything until we have a quote
   if (!currentQuote) {
     return (
       <View style={styles.container}>
@@ -382,10 +291,7 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.Text style={[
-        styles.orderText,
-        { opacity: textOpacity }
-      ]}>
+      <Animated.Text style={[styles.orderText, { opacity: textOpacity }]}>
         {getSortedWords().join(' ')}
       </Animated.Text>
 
@@ -411,24 +317,17 @@ export default function GameScreen() {
             onLockedAttempt={triggerLockedMessage}
             adjacentToCorrect={wordPositions[index].adjacentToCorrect}
             correctIndexTag={wordPositions[index].correctIndexTag}
-            // Victory animation props
-            shouldPlayVictoryAnimation={victoryAnimatingWords.has(index)}
-            onVictoryAnimationComplete={() => handleVictoryAnimationComplete(index)}
           />
         ))}
 
       {showLockedMessage && (
-        <Animated.View 
-          pointerEvents="none"
-          style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
+        <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
           <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
         </Animated.View>
       )}
 
       {showHintMessage && (
-        <Animated.View 
-          pointerEvents="none"
-          style={[styles.lockedMessageContainer, { opacity: hintMessageOpacity }]}>
+        <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: hintMessageOpacity }]}>
           <Text style={styles.lockedMessageText}>No hints remaining</Text>
         </Animated.View>
       )}
@@ -458,50 +357,10 @@ export default function GameScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fffbf1ff',
-  },
-  orderText: {
-    marginTop: 0,
-    fontSize: 16,
-    fontFamily: 'serif',
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center'
-  },
-  bottomRow: {
-    position: 'absolute',
-    bottom: 65,
-    left: 30,
-    right: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  lockedMessageContainer: {
-    position: 'absolute',
-    top: '45%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  lockedMessageText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 100,
-    color: '#666',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#fffbf1ff' },
+  orderText: { marginTop: 0, fontSize: 16, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
+  bottomRow: { position: 'absolute', bottom: 65, left: 30, right: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  lockedMessageContainer: { position: 'absolute', top: '45%', left: '10%', right: '10%', backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: 12, borderRadius: 8, alignItems: 'center', zIndex: 100 },
+  lockedMessageText: { color: '#fff', fontSize: 16, fontWeight: '500', textAlign: 'center' },
+  loadingText: { fontSize: 18, textAlign: 'center', marginTop: 100, color: '#666' },
 });

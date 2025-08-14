@@ -1,41 +1,26 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { createVictoryAnimationValues, playWordVictoryAnimation, resetVictoryAnimation } from '../utils/victoryAnimation';
+import { useState, useEffect } from 'react';
 
-export default function useVictoryAnimation({ shouldPlayVictoryAnimation, onVictoryAnimationComplete, shouldSpawn }) {
-  const victoryAnimationValues = useRef(createVictoryAnimationValues()).current;
-  const hasPlayedVictoryAnimation = useRef(false);
-  const victoryAnimationInProgress = useRef(false);
-  const [shouldStayGreen, setShouldStayGreen] = useState(false);
-
-  const handleVictoryAnimationComplete = useCallback(() => {
-    if (victoryAnimationInProgress.current) {
-      victoryAnimationInProgress.current = false;
-      setTimeout(() => {
-        setShouldStayGreen(true);
-        onVictoryAnimationComplete && onVictoryAnimationComplete();
-      }, 0);
-    }
-  }, [onVictoryAnimationComplete]);
+/**
+ * Hook to delay showing the victory screen
+ * @param {boolean} trigger - when true, start the delay
+ * @param {number} delayMs - delay before showing (default 1000ms)
+ */
+export default function useVictoryScreenDelay(trigger, delayMs = 1000) {
+  const [showVictory, setShowVictory] = useState(false);
 
   useEffect(() => {
-    if (shouldPlayVictoryAnimation && !hasPlayedVictoryAnimation.current && !victoryAnimationInProgress.current) {
-      hasPlayedVictoryAnimation.current = true;
-      victoryAnimationInProgress.current = true;
-      setTimeout(() => {
-        playWordVictoryAnimation(victoryAnimationValues, handleVictoryAnimationComplete, true);
-      }, 0);
-    }
-  }, [shouldPlayVictoryAnimation, handleVictoryAnimationComplete]);
+    let timeoutId;
 
-  // Reset when starting new game
-  useEffect(() => {
-    if (!shouldSpawn && !hasPlayedVictoryAnimation.current) {
-      hasPlayedVictoryAnimation.current = false;
-      victoryAnimationInProgress.current = false;
-      setShouldStayGreen(false);
-      resetVictoryAnimation(victoryAnimationValues, true);
+    if (trigger) {
+      timeoutId = setTimeout(() => {
+        setShowVictory(true);
+      }, delayMs);
+    } else {
+      setShowVictory(false);
     }
-  }, [shouldSpawn, victoryAnimationValues]);
 
-  return { victoryAnimationValues, shouldStayGreen, setShouldStayGreen };
+    return () => clearTimeout(timeoutId);
+  }, [trigger, delayMs]);
+
+  return showVictory;
 }
