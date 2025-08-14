@@ -46,6 +46,10 @@ export default function GameScreen( {navigation}) {
   //submitbutton is locked at start, unlocks after spawn
   const [submitLocked, setSubmitLocked] = useState(true);
   const [submitText, setSubmitText] = useState(`Submit (${remainingSubmits})`);
+
+  const currentSubmitText = hasWon 
+    ? submitText        // animated "Congratulations!" after win
+    : `Submit (${remainingSubmits})`;
   const submitScale = useRef(new Animated.Value(1)).current;
 
 
@@ -163,46 +167,53 @@ export default function GameScreen( {navigation}) {
   }, [wordPositions]);
 
 const handleSubmit = useCallback(() => {
-  if (remainingSubmits <= 0) return;
+  if (submitLocked) {
+    triggerLockedMessage();
+    return;
+  }
+
+  const nextRemaining = remainingSubmits - 1;
+  setRemainingSubmits(nextRemaining);
 
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer, currentQuote.words);
 
-  setRemainingSubmits(prev => prev - 1);
+  // Evaluate positions and get connections
+  const { updatedPositions, connectedPairs } = evaluateWordPositions(
+    wordPositions,
+    currentQuote.words,
+    LAYOUT
+  );
+  setWordPositions(updatedPositions);
+  setConnections(connectedPairs);
+
+  // Merge new connections into persistentConnections
+  setPersistentConnections(prev => {
+    const hasInbound = new Set(prev.map(pair => pair[1]));
+    const hasOutbound = new Set(prev.map(pair => pair[0]));
+    const newOnes = [];
+
+    for (const [from, to] of connectedPairs) {
+      if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+      if (prev.some(([a, b]) => a === from && b === to)) continue;
+      newOnes.push([from, to]);
+      hasOutbound.add(from);
+      hasInbound.add(to);
+    }
+
+    return [...prev, ...newOnes];
+  });
 
   if (isCorrect) {
-    // Lock all words (hint behavior)
-    const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
-    setWordPositions(updatedPositions);
-    setConnections(connectedPairs);
-
-    setPersistentConnections(prev => {
-      const hasInbound = new Set(prev.map(pair => pair[1]));
-      const hasOutbound = new Set(prev.map(pair => pair[0]));
-      const newOnes = [];
-
-      for (const [from, to] of connectedPairs) {
-        if (hasOutbound.has(from) || hasInbound.has(to)) continue;
-        if (prev.some(([a, b]) => a === from && b === to)) continue;
-        newOnes.push([from, to]);
-        hasOutbound.add(from);
-        hasInbound.add(to);
-      }
-
-      return [...prev, ...newOnes];
-    });
-
-    setSubmitLocked(true)
     // Victory logic
+    setSubmitLocked(true);
+
     const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
     const performance =
-        guessesUsed === 1
-        ? 'Perfect!'
-        : guessesUsed <= 2
-        ? 'Excellent!'
-        : guessesUsed <= 3
-        ? 'Good!'
-        : 'A win is a win...';
+      guessesUsed === 1 ? 'Perfect!' :
+      guessesUsed <= 2 ? 'Excellent!' :
+      guessesUsed <= 3 ? 'Good!' :
+      'A win is a win...';
 
     setFinalStats({
       fullQuote: currentQuote.words.join(' '),
@@ -213,19 +224,15 @@ const handleSubmit = useCallback(() => {
 
     setHasWon(true);
 
+    // Animate submit button and show victory screen
     setTimeout(() => {
       Animated.timing(submitScale, {
-        toValue: 0,      // shrink out
-        duration: 300,   // fast shrink
+        toValue: 0,
+        duration: 300,
         useNativeDriver: true,
       }).start(() => {
-        // swap the text once scaled down
         setSubmitText('Congratulations!');
-
-        // reset scale to small
         submitScale.setValue(0.5);
-
-        // pop back in with spring
         Animated.spring(submitScale, {
           toValue: 1,
           friction: 15,
@@ -233,45 +240,24 @@ const handleSubmit = useCallback(() => {
           useNativeDriver: true,
         }).start();
       });
-    }, 150); // 200ms delay after press
+    }, 150);
+
     setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1700);
-
   } else {
-    // Wrong answer → give hint automatically
-  if (remainingSubmits > 0) {
-    // Delay feedback to give "press" feel
+    // Wrong answer → hint feedback
     setTimeout(() => {
-      const { updatedPositions, connectedPairs } = evaluateWordPositions(
-        wordPositions,
-        currentQuote.words,
-        LAYOUT
-      );
-      setWordPositions(updatedPositions);
-      setConnections(connectedPairs);
+      // positions and connections already updated above
+    }, 150);
 
-      setPersistentConnections(prev => {
-        const hasInbound = new Set(prev.map(pair => pair[1]));
-        const hasOutbound = new Set(prev.map(pair => pair[0]));
-        const newOnes = [];
-
-        for (const [from, to] of connectedPairs) {
-          if (hasOutbound.has(from) || hasInbound.has(to)) continue;
-          if (prev.some(([a, b]) => a === from && b === to)) continue;
-          newOnes.push([from, to]);
-          hasOutbound.add(from);
-          hasInbound.add(to);
-        }
-
-        return [...prev, ...newOnes];
-      });
-    }, 150); // tweak delay (ms) for feedback feel
-
-    }
-    else {
-      // no submits left
+    // Lock submit if no guesses left
+    if (nextRemaining <= 0) {
+      console.log("OUT OF GUESSES");
+      setSubmitLocked(true);
+      // Optionally show failure screen here
     }
   }
-}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, hasWon]);
+}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, submitLocked]);
+
 
 
   const handleUnlock = useCallback((index) => {
@@ -355,7 +341,7 @@ const handleSubmit = useCallback(() => {
         <SubmitButton
           onPress={handleSubmit}
           isLocked={submitLocked}
-          text={submitText}
+          text={currentSubmitText}
           scale={submitScale}
         />
 
@@ -368,7 +354,6 @@ const handleSubmit = useCallback(() => {
           guessesUsed={finalStats.guessesUsed}
           performance={finalStats.performance}
           onClose={() => {
-            setHasWon(false);
             setFinalStats(null);
             setShowVictoryScreen(false);
           }}
