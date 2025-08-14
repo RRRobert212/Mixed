@@ -12,13 +12,12 @@ import {
   generateSpawnOrder, 
   createInitialPositions 
 } from '../utils/spawnUtils';
-import { LAYOUT, ANIMATION, MAX_SUBMITS, MAX_HINTS } from '../utils/constants';
+import { LAYOUT, ANIMATION, MAX_SUBMITS } from '../utils/constants';
 import { getRandomQuote } from '../utils/QuoteService';
 import { verifyOrder, evaluateWordPositions } from '../utils/verification';
 
 import Timer from '../components/Timer';
 import SubmitButton from '../components/SubmitButton';
-import HintButton from '../components/HintButton';
 import ConnectionLines from '../components/ConnectionLines';
 import VictoryScreen from '../screens/VictoryScreen';
 
@@ -34,16 +33,10 @@ export default function GameScreen() {
   const [showLockedMessage, setShowLockedMessage] = useState(false);
   const lockedMessageOpacity = useRef(new Animated.Value(0)).current;
 
-  const [showHintMessage, setShowHintMessage] = useState(false);
-  const hintMessageOpacity = useRef(new Animated.Value(0)).current;
-  const lastHintMessageTime = useRef(0);
-
   const [connections, setConnections] = useState([]);
   const [persistentConnections, setPersistentConnections] = useState([]);
 
   const [remainingSubmits, setRemainingSubmits] = useState(MAX_SUBMITS);
-  const [remainingHints, setRemainingHints] = useState(MAX_HINTS);
-
   const [hasWon, setHasWon] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
 
@@ -112,7 +105,6 @@ export default function GameScreen() {
     textOpacity.setValue(0);
 
     setRemainingSubmits(MAX_SUBMITS);
-    setRemainingHints(MAX_HINTS);
     setConnections([]);
     setPersistentConnections([]);
 
@@ -159,74 +151,66 @@ export default function GameScreen() {
       .map(p => p.word);
   }, [wordPositions]);
 
-  const handleSubmit = useCallback(() => {
-    if (remainingSubmits <= 0 || !currentQuote || hasWon) return;
+const handleSubmit = useCallback(() => {
+  if (remainingSubmits <= 0 || !currentQuote || hasWon) return;
 
-    const userAnswer = getSortedWords();
-    const isCorrect = verifyOrder(userAnswer, currentQuote.words);
-    setRemainingSubmits(prev => prev - 1);
+  const userAnswer = getSortedWords();
+  const isCorrect = verifyOrder(userAnswer, currentQuote.words);
 
-    if (isCorrect) {
-      const hintsUsed = MAX_HINTS - remainingHints;
-      const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+  setRemainingSubmits(prev => prev - 1);
 
-      const performance =
-        hintsUsed === 0 && guessesUsed === 1
-          ? 'Perfect!'
-          : hintsUsed <= 1 && guessesUsed <= 2
-          ? 'Excellent!'
-          : hintsUsed <= 2 && guessesUsed <= 3
-          ? 'Good!'
-          : 'A win is a win...';
+  if (isCorrect) {
+    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
 
-      setFinalStats({
-        fullQuote: currentQuote.words.join(' '),
-        quoteAttribution: currentQuote.attribution,
-        hintsUsed,
-        guessesUsed,
-        performance,
-      });
+    const performance =
+        guessesUsed === 1
+        ? 'Perfect!'
+        : guessesUsed <= 2
+        ? 'Excellent!'
+        : guessesUsed <= 3
+        ? 'Good!'
+        : 'A win is a win...';
 
-      setHasWon(true);
-
-      // Delayed victory screen
-      setTimeout(() => setShowVictoryScreen(true), 1000);
-    }
-  }, [remainingSubmits, currentQuote, getSortedWords, remainingHints, hasWon]);
-
-  const handleHint = useCallback(() => {
-    if (remainingHints <= 0) {
-      triggerHintMessage();
-      return;
-    }
-
-    if (!currentQuote) return;
-
-    const userAnswer = getSortedWords();
-    const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
-
-    setWordPositions(updatedPositions);
-    setConnections(connectedPairs);
-
-    setPersistentConnections(prev => {
-      const hasInbound = new Set(prev.map(pair => pair[1]));
-      const hasOutbound = new Set(prev.map(pair => pair[0]));
-      const newOnes = [];
-
-      for (const [from, to] of connectedPairs) {
-        if (hasOutbound.has(from) || hasInbound.has(to)) continue;
-        if (prev.some(([a, b]) => a === from && b === to)) continue;
-
-        newOnes.push([from, to]);
-        hasOutbound.add(from);
-        hasInbound.add(to);
-      }
-
-      return [...prev, ...newOnes];
+    setFinalStats({
+      fullQuote: currentQuote.words.join(' '),
+      quoteAttribution: currentQuote.attribution,
+      guessesUsed,
+      performance,
     });
 
-    setRemainingHints(prev => prev - 1);
-  }, [remainingHints, currentQuote, getSortedWords, wordPositions]);
+    setHasWon(true);
+
+    setTimeout(() => setShowVictoryScreen(true), 1000);
+  } else {
+    // Wrong answer → give hint automatically
+    if (remainingSubmits > 0) {
+      const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
+      setWordPositions(updatedPositions);
+      setConnections(connectedPairs);
+
+      setPersistentConnections(prev => {
+        const hasInbound = new Set(prev.map(pair => pair[1]));
+        const hasOutbound = new Set(prev.map(pair => pair[0]));
+        const newOnes = [];
+
+        for (const [from, to] of connectedPairs) {
+          if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+          if (prev.some(([a, b]) => a === from && b === to)) continue;
+          newOnes.push([from, to]);
+          hasOutbound.add(from);
+          hasInbound.add(to);
+        }
+
+        return [...prev, ...newOnes];
+      });
+
+
+    } else {
+
+      //no submits left!!!
+    }
+  }
+}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, hasWon]);
 
   const handleUnlock = useCallback((index) => {
     setWordPositions(prevPositions => {
@@ -258,28 +242,6 @@ export default function GameScreen() {
     });
   }, [showLockedMessage, lockedMessageOpacity]);
 
-  const triggerHintMessage = useCallback(() => {
-    const now = Date.now();
-    if (showHintMessage || now - lastHintMessageTime.current < 3000) return;
-
-    lastHintMessageTime.current = now;
-    setShowHintMessage(true);
-    hintMessageOpacity.setValue(0);
-
-    Animated.timing(hintMessageOpacity, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setTimeout(() => {
-        Animated.timing(hintMessageOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowHintMessage(false));
-      }, 1500);
-    });
-  }, [showHintMessage, hintMessageOpacity]);
 
   if (!currentQuote) {
     return (
@@ -326,14 +288,8 @@ export default function GameScreen() {
         </Animated.View>
       )}
 
-      {showHintMessage && (
-        <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: hintMessageOpacity }]}>
-          <Text style={styles.lockedMessageText}>No hints remaining</Text>
-        </Animated.View>
-      )}
 
       <View style={styles.bottomRow}>
-        <HintButton onPress={handleHint} remainingHints={remainingHints} />
         <SubmitButton onPress={handleSubmit} remainingSubmits={remainingSubmits} />
       </View>
 
@@ -341,7 +297,6 @@ export default function GameScreen() {
         <VictoryScreen
           fullQuote={finalStats.fullQuote}
           quoteAttribution={finalStats.quoteAttribution}
-          hintsUsed={finalStats.hintsUsed}
           guessesUsed={finalStats.guessesUsed}
           performance={finalStats.performance}
           onClose={() => {

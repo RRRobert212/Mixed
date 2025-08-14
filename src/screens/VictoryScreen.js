@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'; // ✅ Add this
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, guessesUsed, performance, onClose }) {
+export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed, performance, onClose }) {
 
   const navigation = useNavigation(); // ✅ Hook into navigation
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -79,7 +79,6 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, hintsUsed, 
         </Text>
 
         <Text style={styles.stats}>Guesses: {guessesUsed}</Text>
-        <Text style={styles.stats}>Hints Used: {hintsUsed}</Text>
 
         <TouchableOpacity style={styles.button} onPress={handleGoHome}>
           <Text style={styles.buttonText}>Back to Home</Text>

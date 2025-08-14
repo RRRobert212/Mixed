@@ -24,6 +24,5 @@ export const ANIMATION = {
   SCALE_TENSION: 200,
 };
 
-// Difficulty changes with these, max guesses and hints
+// Difficulty changes with these, max guesses
 export const MAX_SUBMITS = 4;
-export const MAX_HINTS = 3;
