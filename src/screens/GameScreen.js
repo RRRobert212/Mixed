@@ -160,8 +160,29 @@ const handleSubmit = useCallback(() => {
   setRemainingSubmits(prev => prev - 1);
 
   if (isCorrect) {
-    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+    // Lock all words (hint behavior)
+    const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
+    setWordPositions(updatedPositions);
+    setConnections(connectedPairs);
 
+    setPersistentConnections(prev => {
+      const hasInbound = new Set(prev.map(pair => pair[1]));
+      const hasOutbound = new Set(prev.map(pair => pair[0]));
+      const newOnes = [];
+
+      for (const [from, to] of connectedPairs) {
+        if (hasOutbound.has(from) || hasInbound.has(to)) continue;
+        if (prev.some(([a, b]) => a === from && b === to)) continue;
+        newOnes.push([from, to]);
+        hasOutbound.add(from);
+        hasInbound.add(to);
+      }
+
+      return [...prev, ...newOnes];
+    });
+
+    // Victory logic
+    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
     const performance =
         guessesUsed === 1
         ? 'Perfect!'
@@ -179,8 +200,8 @@ const handleSubmit = useCallback(() => {
     });
 
     setHasWon(true);
+    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 900);
 
-    setTimeout(() => setShowVictoryScreen(true), 1000);
   } else {
     // Wrong answer → give hint automatically
     if (remainingSubmits > 0) {
@@ -203,14 +224,12 @@ const handleSubmit = useCallback(() => {
 
         return [...prev, ...newOnes];
       });
-
-
     } else {
-
-      //no submits left!!!
+      // no submits left
     }
   }
 }, [remainingSubmits, currentQuote, getSortedWords, wordPositions, hasWon]);
+
 
   const handleUnlock = useCallback((index) => {
     setWordPositions(prevPositions => {
