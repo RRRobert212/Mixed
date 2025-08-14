@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, Modal }
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed, performance, onClose }) {
+export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed, performance, onClose, onGoHome }) {
   const [visible, setVisible] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -45,6 +45,17 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed
     });
   };
 
+  const handleGoHome = () => {
+    Animated.parallel([
+      Animated.timing(overlayFadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+    ]).start(() => {
+      setVisible(false);
+      onGoHome?.();
+    });
+  };
+
   function renderAttribution(text) {
     const parts = text.split(/(\*[^*]+\*)/);
     return parts.map((part, index) => {
@@ -67,7 +78,7 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed
           <Text style={styles.attribution}>{renderAttribution(quoteAttribution)}</Text>
           <Text style={styles.stats}>Guesses Used: {guessesUsed}</Text>
 
-          <TouchableOpacity style={styles.button} onPress={handleClose}>
+          <TouchableOpacity style={styles.button} onPress={handleGoHome}>
             <Text style={styles.buttonText}>Back to Home</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>

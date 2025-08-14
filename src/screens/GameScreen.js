@@ -21,7 +21,7 @@ import SubmitButton from '../components/SubmitButton';
 import ConnectionLines from '../components/ConnectionLines';
 import VictoryScreen from '../screens/VictoryScreen';
 
-export default function GameScreen() {
+export default function GameScreen( {navigation}) {
   const [wordPositions, setWordPositions] = useState([]);
   const [spawnedWords, setSpawnedWords] = useState(0);
   const [isSpawning, setIsSpawning] = useState(true);
@@ -45,6 +45,10 @@ export default function GameScreen() {
 
   //submitbutton is locked at start, unlocks after spawn
   const [submitLocked, setSubmitLocked] = useState(true);
+  const [submitText, setSubmitText] = useState(`Submit (${remainingSubmits})`);
+  const submitScale = useRef(new Animated.Value(1)).current;
+
+
 
   const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
@@ -159,7 +163,7 @@ export default function GameScreen() {
   }, [wordPositions]);
 
 const handleSubmit = useCallback(() => {
-  if (remainingSubmits <= 0 || !currentQuote || hasWon) return;
+  if (remainingSubmits <= 0) return;
 
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer, currentQuote.words);
@@ -188,6 +192,7 @@ const handleSubmit = useCallback(() => {
       return [...prev, ...newOnes];
     });
 
+    setSubmitLocked(true)
     // Victory logic
     const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
     const performance =
@@ -207,7 +212,29 @@ const handleSubmit = useCallback(() => {
     });
 
     setHasWon(true);
-    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1100);
+
+    setTimeout(() => {
+      Animated.timing(submitScale, {
+        toValue: 0,      // shrink out
+        duration: 300,   // fast shrink
+        useNativeDriver: true,
+      }).start(() => {
+        // swap the text once scaled down
+        setSubmitText('Congratulations!');
+
+        // reset scale to small
+        submitScale.setValue(0.5);
+
+        // pop back in with spring
+        Animated.spring(submitScale, {
+          toValue: 1,
+          friction: 15,
+          tension: 60,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 150); // 200ms delay after press
+    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1700);
 
   } else {
     // Wrong answer → give hint automatically
@@ -325,13 +352,13 @@ const handleSubmit = useCallback(() => {
 
 
       <View style={styles.bottomRow}>
-        <SubmitButton 
-            onPress={() => {
-              if (submitLocked) return;
-              handleSubmit();
-            }} 
-            remainingSubmits={remainingSubmits} 
-          />
+        <SubmitButton
+          onPress={handleSubmit}
+          isLocked={submitLocked}
+          text={submitText}
+          scale={submitScale}
+        />
+
       </View>
 
       {hasWon && finalStats && showVictoryScreen && (
@@ -345,6 +372,7 @@ const handleSubmit = useCallback(() => {
             setFinalStats(null);
             setShowVictoryScreen(false);
           }}
+          onGoHome={() => navigation.navigate('Home')}
         />
       )}
     </View>
