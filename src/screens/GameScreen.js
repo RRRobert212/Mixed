@@ -43,6 +43,9 @@ export default function GameScreen() {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
 
+  //submitbutton is locked at start, unlocks after spawn
+  const [submitLocked, setSubmitLocked] = useState(true);
+
   const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
       const currentPos = currentPositions[index];
@@ -125,6 +128,10 @@ export default function GameScreen() {
           setHasStarted(true);
 
           setTimeout(() => {
+            setSubmitLocked(false);
+          }, 1000);
+
+          setTimeout(() => {
             setShowText(true);
             Animated.timing(textOpacity, {
               toValue: 1,
@@ -200,12 +207,18 @@ const handleSubmit = useCallback(() => {
     });
 
     setHasWon(true);
-    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 900);
+    setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1100);
 
   } else {
     // Wrong answer → give hint automatically
-    if (remainingSubmits > 0) {
-      const { updatedPositions, connectedPairs } = evaluateWordPositions(wordPositions, currentQuote.words, LAYOUT);
+  if (remainingSubmits > 0) {
+    // Delay feedback to give "press" feel
+    setTimeout(() => {
+      const { updatedPositions, connectedPairs } = evaluateWordPositions(
+        wordPositions,
+        currentQuote.words,
+        LAYOUT
+      );
       setWordPositions(updatedPositions);
       setConnections(connectedPairs);
 
@@ -224,7 +237,10 @@ const handleSubmit = useCallback(() => {
 
         return [...prev, ...newOnes];
       });
-    } else {
+    }, 150); // tweak delay (ms) for feedback feel
+
+    }
+    else {
       // no submits left
     }
   }
@@ -309,7 +325,13 @@ const handleSubmit = useCallback(() => {
 
 
       <View style={styles.bottomRow}>
-        <SubmitButton onPress={handleSubmit} remainingSubmits={remainingSubmits} />
+        <SubmitButton 
+            onPress={() => {
+              if (submitLocked) return;
+              handleSubmit();
+            }} 
+            remainingSubmits={remainingSubmits} 
+          />
       </View>
 
       {hasWon && finalStats && showVictoryScreen && (
@@ -322,7 +344,6 @@ const handleSubmit = useCallback(() => {
             setHasWon(false);
             setFinalStats(null);
             setShowVictoryScreen(false);
-            initializeGame();
           }}
         />
       )}
@@ -331,9 +352,9 @@ const handleSubmit = useCallback(() => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fffbf1ff' },
+  container: { flex: 1, padding: 20,  backgroundColor: '#fffae9', },
   orderText: { marginTop: 0, fontSize: 16, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
-  bottomRow: { position: 'absolute', bottom: 65, left: 30, right: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bottomRow: { position: 'absolute', bottom: 65, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   lockedMessageContainer: { position: 'absolute', top: '45%', left: '10%', right: '10%', backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: 12, borderRadius: 8, alignItems: 'center', zIndex: 100 },
   lockedMessageText: { color: '#fff', fontSize: 16, fontWeight: '500', textAlign: 'center' },
   loadingText: { fontSize: 18, textAlign: 'center', marginTop: 100, color: '#666' },

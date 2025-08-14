@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const input = fs.readFileSync('quotes-raw.txt', 'utf-8');
+const input = fs.readFileSync('quotes-raw copy.txt', 'utf-8');
 
 const quotes = input
   .split('\n')

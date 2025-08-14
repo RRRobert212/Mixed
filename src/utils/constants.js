@@ -2,7 +2,7 @@
 import { Dimensions } from 'react-native';
 
 export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-export const BUTTON_WIDTH = SCREEN_WIDTH * 0.3;
+export const BUTTON_WIDTH = SCREEN_WIDTH * 0.5;
 
 export const LAYOUT = {
   EDGE_PADDING: 10,
@@ -25,4 +25,4 @@ export const ANIMATION = {
 };
 
 // Difficulty changes with these, max guesses
-export const MAX_SUBMITS = 4;
+export const MAX_SUBMITS = 6;

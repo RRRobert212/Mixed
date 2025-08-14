@@ -65,7 +65,7 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed
           <Text style={styles.title}>{performance}</Text>
           <Text style={styles.quote}>"{fullQuote}"</Text>
           <Text style={styles.attribution}>{renderAttribution(quoteAttribution)}</Text>
-          <Text style={styles.stats}>Guesses: {guessesUsed}</Text>
+          <Text style={styles.stats}>Guesses Used: {guessesUsed}</Text>
 
           <TouchableOpacity style={styles.button} onPress={handleClose}>
             <Text style={styles.buttonText}>Back to Home</Text>
