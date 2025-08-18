@@ -44,107 +44,195 @@ Alas! Poor Yorick. I knew him, Horatio; a fellow of infinite jest... | William S
 The rest is silence. | William Shakespeare, *Hamlet*
 Now cracks a noble heart. Goodnight, sweet prince, And flights of angels sing thee to thy rest! | William Shakespeare, *Hamlet*
 
-I see no reason why thou shoudst be so superfluous to demand the time of the day. | William Shakespeare *King Henry IV Part I*
-O thou hast damnable iteration, and art, indeed, able to corrupt a saint. | William Shakespeare *King Henry IV Part I*
-Constant you are, But yet a woman... | William Shakespeare *King Henry IV Part I*
-There live not three good men unhanged in England, and one of them is fat and grows old. | William Shakespeare *King Henry IV Part I*
-Now I perceive the devil understands Welsh. | William Shakespeare *King Henry IV Part I*
-I have more flesh than another man, and therefore more frailty. | William Shakespeare *King Henry IV Part I*
-I am as vigilant as a cat to steal cream. | William Shakespeare *King Henry IV Part I*
-When that his body did contain a spirit, A kingdom for it was too small a bound... | William Shakespeare *King Henry IV Part I*
+I see no reason why thou shoudst be so superfluous to demand the time of the day. | William Shakespeare, *King Henry IV Part I*
+O thou hast damnable iteration, and art, indeed, able to corrupt a saint. | William Shakespeare, *King Henry IV Part I*
+Constant you are, But yet a woman... | William Shakespeare, *King Henry IV Part I*
+There live not three good men unhanged in England, and one of them is fat and grows old. | William Shakespeare, *King Henry IV Part I*
+Now I perceive the devil understands Welsh. | William Shakespeare, *King Henry IV Part I*
+I have more flesh than another man, and therefore more frailty. | William Shakespeare, *King Henry IV Part I*
+I am as vigilant as a cat to steal cream. | William Shakespeare, *King Henry IV Part I*
+When that his body did contain a spirit, A kingdom for it was too small a bound... | William Shakespeare, *King Henry IV Part I*
 
-He hath eaten me out of house and home. | William Shakespeare *King Henry IV Part II*
-Uneasy lies the head that wears a crown. | William Shakespeare *King Henry IV Part II*
-A man cannor make him laugh; but that's no marvel; he drinks no wine. | William Shakespeare *King Henry IV Part II*
+He hath eaten me out of house and home. | William Shakespeare, *King Henry IV Part II*
+Uneasy lies the head that wears a crown. | William Shakespeare, *King Henry IV Part II*
+A man cannor make him laugh; but that's no marvel; he drinks no wine. | William Shakespeare, *King Henry IV Part II*
 
-Trust none; For oaths are straws, men's faiths are wafer-cakes... | William Shakespeare *King Henry V*
-Once more unto the breach, dear friends, once more... | William Shakespeare *King Henry V*
-I would give all my fame for a pot of ale, and safety. | William Shakespeare *King Henry V*
-Men of few words are the best men. | William Shakespeare *King Henry V*
-I think the king is but a man, as I am: the violet smells to him as it doth to me. | William Shakespeare *King Henry V*
-But if it be a sin to covet honour I am the most offending soul alive. | William Shakespeare *King Henry V*
-We few, we happy few, we band of brothers... | William Shakespeare *King Henry V*
-Thou damned and luxurious mountain goat. | William Shakespeare *King Henry V*
+Trust none; For oaths are straws, men's faiths are wafer-cakes... | William Shakespeare, *King Henry V*
+Once more unto the breach, dear friends, once more... | William Shakespeare, *King Henry V*
+I would give all my fame for a pot of ale, and safety. | William Shakespeare, *King Henry V*
+Men of few words are the best men. | William Shakespeare, *King Henry V*
+I think the king is but a man, as I am: the violet smells to him as it doth to me. | William Shakespeare, *King Henry V*
+But if it be a sin to covet honour I am the most offending soul alive. | William Shakespeare, *King Henry V*
+We few, we happy few, we band of brothers... | William Shakespeare, *King Henry V*
+Thou damned and luxurious mountain goat. | William Shakespeare, *King Henry V*
 
-Unbidden guests Are often welcomest when they are gone. | William Shakespeare *King Henry VI Part I*
+Unbidden guests Are often welcomest when they are gone. | William Shakespeare, *King Henry VI Part I*
 
-Could I come near your beauty with my nails I'd set my ten commandments in your face | William Shakespeare *King Henry VI Part II*
-The first thing we do, let's kill all the lawyers. | William Shakespeare *King Henry VI Part II*
+Could I come near your beauty with my nails I'd set my ten commandments in your face | William Shakespeare, *King Henry VI Part II*
+The first thing we do, let's kill all the lawyers. | William Shakespeare, *King Henry VI Part II*
 
-Live how we can, yet die we must. | William Shakespeare *King Henry VI Part III*
-Down, down to hell; and say I sent thee thither. | William Shakespeare *King Henry VI Part III*
+Live how we can, yet die we must. | William Shakespeare, *King Henry VI Part III*
+Down, down to hell; and say I sent thee thither. | William Shakespeare, *King Henry VI Part III*
 
-If I chance to talk a little wild, forgive me; I had it from my father | William Shakespeare *King Henry VIII*
-Love theyself last: cherish those hearts that hate thee... | William Shakespeare *King Henry VIII*
-His promises were, as he then was, mighty; But his performance, as he is now, nothing. | William Shakespeare *King Henry VIII*
+If I chance to talk a little wild, forgive me; I had it from my father | William Shakespeare, *King Henry VIII*
+Love theyself last: cherish those hearts that hate thee... | William Shakespeare, *King Henry VIII*
+His promises were, as he then was, mighty; But his performance, as he is now, nothing. | William Shakespeare, *King Henry VIII*
 
-Life is as tedious as a twice-told tale, Vexing the dull ear of a drowsy man. | William Shakespeare *King John*
+Life is as tedious as a twice-told tale, Vexing the dull ear of a drowsy man. | William Shakespeare, *King John*
 
-The fault, dear Brutus, is not in our stars, But in ourselves, that we are underlings. | William Shakespeare *Julius Caeser*
-For mine own part, it was Greek to me. | William Shakespeare *Julius Caeser*
-Let's carve him as a dish fit for the gods, Not hew him as a carcass fit for hounds. | William Shakespeare *Julius Caeser*
-Cowards die many times before their deaths; The valiant never taste of death but once. | William Shakespeare *Julius Caeser*
-O mighty Caeser! Dost thou lie so low? Are all they conquests, glories, triumphs, spoils, Shrunk to this little measure. | William Shakespeare *Julius Caeser*
-Cry 'Havoc!' and let slip the dogs of war. | William Shakespeare *Julius Caeser*
-As he was valiant, I honour him: but as he was ambitious, I slew him. | William Shakespeare *Julius Caeser*
-Not that I loved Caesar less, but that I loved Rome more. | William Shakespeare *Julius Caeser*
-Friends, Romans, countrymen, lend me your ears; I come to bury Caesar not to praise him. | William Shakespeare *Julius Caeser*
-When that the poor have cried, Caesar hath wept; Ambition should be made of sterner stuff. | William Shakespeare *Julius Caeser*
-O judgement! Thou art fled to brutish beasts, And men have lost their reason. | William Shakespeare *Julius Caeser*
+The fault, dear Brutus, is not in our stars, But in ourselves, that we are underlings. | William Shakespeare, *Julius Caeser*
+For mine own part, it was Greek to me. | William Shakespeare, *Julius Caeser*
+Let's carve him as a dish fit for the gods, Not hew him as a carcass fit for hounds. | William Shakespeare, *Julius Caeser*
+Cowards die many times before their deaths; The valiant never taste of death but once. | William Shakespeare, *Julius Caeser*
+O mighty Caeser! Dost thou lie so low? Are all they conquests, glories, triumphs, spoils, Shrunk to this little measure. | William Shakespeare, *Julius Caeser*
+Cry 'Havoc!' and let slip the dogs of war. | William Shakespeare, *Julius Caeser*
+As he was valiant, I honour him: but as he was ambitious, I slew him. | William Shakespeare, *Julius Caeser*
+Not that I loved Caesar less, but that I loved Rome more. | William Shakespeare, *Julius Caeser*
+Friends, Romans, countrymen, lend me your ears; I come to bury Caesar not to praise him. | William Shakespeare, *Julius Caeser*
+When that the poor have cried, Caesar hath wept; Ambition should be made of sterner stuff. | William Shakespeare, *Julius Caeser*
+O judgement! Thou art fled to brutish beasts, And men have lost their reason. | William Shakespeare, *Julius Caeser*
 
-Have more than thou showest, Speak less than thou knowest, Lend less than thou owest. | William Shakespeare *King Lear*
-How sharper than a serpent's tooth it is To have a thankless child! | William Shakespeare *King Lear*
-The prince of darkness is a gentlemen. | William Shakespeare *King Lear*
-Things that love night Love not such nights as these. | William Shakespeare *King Lear*
-As flies to wanton boys, are we to the gods; They kill us for their sport. | William Shakespeare *King Lear*
-You are not worth the dust which the rude wind blows in your face. | William Shakespeare *King Lear*
-Upon such sacrifices my Cordelia, The gods themselves throw incense. | William Shakespeare *King Lear*
-The wheel is come full circle. | William Shakespeare *King Lear*
-Speak what we feel; not what we ought to say. | William Shakespeare *King Lear*
+Have more than thou showest, Speak less than thou knowest, Lend less than thou owest. | William Shakespeare, *King Lear*
+How sharper than a serpent's tooth it is To have a thankless child! | William Shakespeare, *King Lear*
+The prince of darkness is a gentlemen. | William Shakespeare, *King Lear*
+Things that love night Love not such nights as these. | William Shakespeare, *King Lear*
+As flies to wanton boys, are we to the gods; They kill us for their sport. | William Shakespeare, *King Lear*
+You are not worth the dust which the rude wind blows in your face. | William Shakespeare, *King Lear*
+Upon such sacrifices my Cordelia, The gods themselves throw incense. | William Shakespeare, *King Lear*
+The wheel is come full circle. | William Shakespeare, *King Lear*
+Speak what we feel; not what we ought to say. | William Shakespeare, *King Lear*
 
-By heaven, I do love, and it hath taught me to rhyme, and to be melancholy. | William Shakespeare *Love's Labour's Lost*
+By heaven, I do love, and it hath taught me to rhyme, and to be melancholy. | William Shakespeare, *Love's Labour's Lost*
 
-When shall we three meet again In thunder, lightning, or in rain? | William Shakespeare *Macbeth*
-Fair is foul, and foul is fair: Hover through the fog and filthy air. | William Shakespeare *Macbeth*
-You should be women, And yet your beards forbid me to interpret That you are so. | William Shakespeare *Macbeth*
-What! Can the devil speak true? | William Shakespeare *Macbeth*
-Look like the innocent flower, But be the serpent under it. | William Shakespeare *Macbeth*
-If we should fail- We fail! But screw your courage to the sticking place, And we'll not fail. | William Shakespeare *Macbeth*
-Is this a dagger which I see before me, The handle toward my hand? | William Shakespeare *Macbeth*
-I have done the deed. Didst thou not hear a noise? | William Shakespeare *Macbeth*
-Methought I heard a voice cry, 'Sleep no more! Macbeth does murder sleep.' | William Shakespeare *Macbeth*
-Will all great Neptune's ocean wash this blood Clean from my hand? | William Shakespeare *Macbeth*
-There's daggers in men's smiles. | William Shakespeare *Macbeth*
-Double, double toil and trouble; Fire burn, and cauldron bubble. | William Shakespeare *Macbeth*
-By the pricking of my thumbs, Something wicked this way comes. | William Shakespeare *Macbeth*
-Out, damned spot! Out I say! | William Shakespeare *Macbeth*
-Yet who would have thought the old man to have had so much blood in him? | William Shakespeare *Macbeth*
-All the perfumes of Arabia will not sweeten this little hand. | William Shakespeare *Macbeth*
-All that is within him does condemn itself for being there. | William Shakespeare *Macbeth*
-She should have died hereafter; There would have been time for such a word. | William Shakespeare *Macbeth*
-Out, out brief candle! Life's but a walking shadow... | William Shakespeare *Macbeth*
-...it is a tale Told by an idiot, full of sound and fury, Signifying nothing. | William Shakespeare *Macbeth*
-Macduff was from his mother's womb Untimely ripped. | William Shakespeare *Macbeth*
-Lay on Macduff; And damn'd be him that first cries, 'Hold Enough!' | William Shakespeare *Macbeth*
+When shall we three meet again In thunder, lightning, or in rain? | William Shakespeare, *Macbeth*
+Fair is foul, and foul is fair: Hover through the fog and filthy air. | William Shakespeare, *Macbeth*
+You should be women, And yet your beards forbid me to interpret That you are so. | William Shakespeare, *Macbeth*
+What! Can the devil speak true? | William Shakespeare, *Macbeth*
+Look like the innocent flower, But be the serpent under it. | William Shakespeare, *Macbeth*
+If we should fail- We fail! But screw your courage to the sticking place, And we'll not fail. | William Shakespeare, *Macbeth*
+Is this a dagger which I see before me, The handle toward my hand? | William Shakespeare, *Macbeth*
+I have done the deed. Didst thou not hear a noise? | William Shakespeare, *Macbeth*
+Methought I heard a voice cry, 'Sleep no more! Macbeth does murder sleep.' | William Shakespeare, *Macbeth*
+Will all great Neptune's ocean wash this blood Clean from my hand? | William Shakespeare, *Macbeth*
+There's daggers in men's smiles. | William Shakespeare, *Macbeth*
+Double, double toil and trouble; Fire burn, and cauldron bubble. | William Shakespeare, *Macbeth*
+By the pricking of my thumbs, Something wicked this way comes. | William Shakespeare, *Macbeth*
+Out, damned spot! Out I say! | William Shakespeare, *Macbeth*
+Yet who would have thought the old man to have had so much blood in him? | William Shakespeare, *Macbeth*
+All the perfumes of Arabia will not sweeten this little hand. | William Shakespeare, *Macbeth*
+All that is within him does condemn itself for being there. | William Shakespeare, *Macbeth*
+She should have died hereafter; There would have been time for such a word. | William Shakespeare, *Macbeth*
+Out, out brief candle! Life's but a walking shadow... | William Shakespeare, *Macbeth*
+...it is a tale Told by an idiot, full of sound and fury, Signifying nothing. | William Shakespeare, *Macbeth*
+Macduff was from his mother's womb Untimely ripped. | William Shakespeare, *Macbeth*
+Lay on Macduff; And damn'd be him that first cries, 'Hold Enough!' | William Shakespeare, *Macbeth*
 
-They say most men are moulded out of faults, And, for the most, become much more the better For being a little bad. | William Shakespeare *Measure for Measure*
+They say most men are moulded out of faults, And, for the most, become much more the better For being a little bad. | William Shakespeare, *Measure fo
 
-By the pricking of my thumbs, something wicked this way comes. | William Shakespeare, *Macbeth*
-It is a tale told by an idiot, full of sound and fury, signifying nothing. | William Shakespeare, *Macbeth*
-Life's but a walking shadow, a poor player, that struts and frets his hour upon the stage, and then is heard no more. | William Shakespeare, *Macbeth*
-Look like the innocent flower, but be the serpent under it. | William Shakespeare, *Macbeth*
+He doth nothing but talk of his horse. | William Shakespeare, *The Merchant of Venice*
+Ships are but boards, sailors but men; there be land-rats and water-rats, land-thieves and water-thieves. | William Shakespeare, *The Merchant of Venice*
+But love is blind, and lovers cannot see The pretty follies that they themselves commit. | William Shakespeare, *The Merchant of Venice*
+The quality of mercy is not strained, It droppeth as the gentle rain from heaven. | William Shakespeare, *The Merchant of Venice*
+It blesseth him that gives and him that takes: 'Tis mighties in the mightiest... | William Shakespeare, *The Merchant of Venice*
+Though justice be thy plea, consider this, That in the course of justice none of us Should see salvation... | William Shakespeare, *The Merchant of Venice*
+Wrest once the law to your authority: To do a great right, do a little wrong. | William Shakespeare, *The Merchant of Venice*
+Thou shalt have justice, more than thou desires it. | William Shakespeare, *The Merchant of Venice*
 
-One may smile, and smile, and be a villain; at least I'm sure it may be so in Denmark. | William Shakespeare, *Hamlet*
-Something is rotten in the state of Denmark. | William Shakespeare, *Hamlet*
-I could be bounded in a nutshell, and count myself a king of infinite space, were it not that I have bad dreams. | William Shakespeare, *Hamlet*
-Alas, poor Yorick! I knew him, Horatio: a fellow of infinite jest, of most excellent fancy... | William Shakespeare, *Hamlet*
-The lady doth protest too much, methinks | William Shakespeare, *Hamlet*
+Lord, what fools these mortals be! | William Shakespeare, *A Midsummer Night's Dream*
+My Oberon! What visions have I seen! Methought I was enamour'd of an ass. | William Shakespeare, *A Midsummer Night's Dream*
+The iron tongue of midnight hath told twelve; Lovers, to bed; 'tis almost fairy time. | William Shakespeare, *A Midsummer Night's Dream*
 
-These violent delights have violent ends | William Shakespeare, *Romeo and Juliet*
-Good night, good night! parting is such sweet sorrow, That I shall say good night till it be morrow. | William Shakespeare, *Romeo and Juliet*
-Love goes toward love as schoolboys from their books, But love from love, toward school with heavy looks. | William Shakespeare, *Romeo and Juliet*
-What's in a name? that which we call a rose by any other name would smell as sweet. | William Shakespeare, *Romeo and Juliet*
-Two households, both alike in dignity, In fair Verona, where we lay our scene... | William Shakespeare, *Romeo and Juliet*
-How art thou out of breath when thou hast breath to say to me that thou art out of breath? | William Shakespeare, *Romeo and Juliet*
+Friendship is constant in all other things Save in the office and affairs of love. | William Shakespeare, *Much Ado About Nothing*
+Everyone can master a grief but he that has it. | William Shakespeare, *Much Ado About Nothing*
+Done to death by slanderous tongues. | William Shakespeare, *Much Ado About Nothing*
+
+Sir, you are one of those that will not serve God if the devil bid you. | William Shakespeare, *Othello*
+To mourn mischief that is past and gone Is the next way to draw new mischief on. | William Shakespeare, *Othello*
+The robbed that smiles steals something from the thief. | William Shakespeare, *Othello*
+'Tis pride that pulls the country down. | William Shakespeare, *Othello*
+He is a soldier fir to stand by Caeser And give direction. | William Shakespeare, *Othello*
+I have lost my reputation. I have lost the immortal part of myself, and what remains is bestial. | William Shakespeare, *Othello*
+How poor are they that have not patience! What wound did ever heal but by degrees? | William Shakespeare, *Othello*
+I humbly do beseech you of your pardon For too much loving you. | William Shakespeare, *Othello*
+My heart is turned to stone; I strike it, and it hurts my hand. | William Shakespeare, *Othello*
+O, she will sing the savageness out of a bear. | William Shakespeare, *Othello*
+You, mistress, That have the office opposite to Saint Peter, And keep the gate of hell! | William Shakespeare, *Othello*
+A guiltless death I die. | William Shakespeare, *Othello*
+I kissed thee ere I killed thee. | William Shakespeare, *Othello*
+
+Few love to hear the sins they love to act | William Shakespeare, *Pericles*
+
+This must my comfort be, That sun that warms you here shall shine on me. | William Shakespeare, *King Richard II*
+That England, that was wont to conquer others, Hath made a shameful conquest of itself. | William Shakespeare, *King Richard II*
+I weep for joy, To stand upon my kingdom once again. | William Shakespeare, *King Richard II*
+You may my glories and my state depose, But not my griefs; still I am king of those | William Shakespeare, *King Richard II*
+With mine own hands I give away my crown. | William Shakespeare, *King Richard II*
+
+Talk'st thou to me of 'ifs'? Thou art a traitor: Off with his head! | William Shakespeare, *King Richard III*
+There is no creature loves me; And if I die, no soul will pity me. | William Shakespeare, *King Richard III*
+A horse! A horse! My kingdom for a horse! | William Shakespeare, *King Richard III*
+
+No, sir, I do not bite my thumb at you, sir; but I bite my thumb, sir. | William Shakespeare, *Romeo and Juliet*
+O then, I see, Queen Mab hath been with you... | William Shakespeare, *Romeo and Juliet*
+My only love sprung from my only hate! | William Shakespeare, *Romeo and Juliet*
+But, soft! What light through yonder window breaks? It is the east, and Juliet is the sun. | William Shakespeare, *Romeo and Juliet*
+How she leans her cheek upon her hand: O that I were a glove upon that hand, That I might touch that cheek. | William Shakespeare, *Romeo and Juliet*
+O Romeo, Romeo! Wherefore art thou Romeo? | William Shakespeare, *Romeo and Juliet*
+What's in a name? That which we call a rose By any other name would smell as sweet. | William Shakespeare, *Romeo and Juliet*
+O gentle Romeo! If thou dost love, pronounce it faithfully... | William Shakespeare, *Romeo and Juliet*
+O swear not by the moon, the inconstant moon, That monthly changes in her circled orb... | William Shakespeare, *Romeo and Juliet*
+Love goes toward love, as schoolboys from their books; But love from love, toward school with heavy looks. | William Shakespeare, *Romeo and Juliet*
+Goodnight, goodnight! Parting is such sweet sorrow That I shall say goodnight till it be morrow. | William Shakespeare, *Romeo and Juliet*
+These violent delights have violent ends, And in their triumph die. | William Shakespeare, *Romeo and Juliet*
+A plague on both your houses! They have made worms' meat of me. | William Shakespeare, *Romeo and Juliet*
+Tempt not a desperate man. | William Shakespeare, *Romeo and Juliet*
+No profit grows where is no pleasure taken; In brief, sir, study what you most affect. | William Shakespeare, *Romeo and Juliet*
+
+O this learning, what a thing it is. | William Shakespeare, *The Taming of the Shrew*
+
+Now would I give a thousand furlongs of sea for an acre of barren ground. | William Shakespeare, *The Tempest*
+Your tale, sir, would cure deafness. | William Shakespeare, *The Tempest*
+Misery acquaints a man with strange bedfellows. | William Shakespeare, *The Tempest*
+Our revels are now ended. These our actors, As I foretold you, were all spirits and Are melted into air, into thin air... | William Shakespeare, *The Tempest*
+We are such stuff As dreams are made on, and our little life Is rounded with a sleep. | William Shakespeare, *The Tempest*
+
+Nothing emboldens sin so much as mercy. | William Shakespeare, *Timon of Athens*
+Tis not enough to help the feeble up, But to support him after. | William Shakespeare, *Timon of Athens*
+
+The eagle suffers little birds to sing, And is not careful what they mean therevy. | William Shakespeare, *Titus Andronicus*
+
+Men prize the thing ungain'd more than it is. | William Shakespeare, *Trolius and Cressida*
+
+If music be the food of love, play on... | William Shakespeare, *Twelfth Night*
+When mine eyes did see Olivia first, Methought she purged the air of pestilence. | William Shakespeare, *Twelfth Night*
+I am a great eater of beef, and I believe that does harm to my wit. | William Shakespeare, *Twelfth Night*
+Many a good hanging prevents a bad marriage. | William Shakespeare, *Twelfth Night*
+Some men are born great, some achieve greatness, and some have greatness thrust upon them. | William Shakespeare, *Twelfth Night*
+If this were played upon a stage now, I could condemn it as an improbable fiction. | William Shakespeare, *Twelfth Night*
+
+How use doth breed a habit in a man! | William Shakespeare, *Two Gentlemen of Verona*
+
+Exit, pursued by a bear. | William Shakespeare, *The Winter's Tale* (Stage Direction)
+Though I am not naturally honest, I am so sometimes by chance. | William Shakespeare, *The Winter's Tale*
+
+Crabbed age and youth cannot live together: Youth is full of pleasance, age is full of care. | William Shakespeare, *The Passionate Pilgrim*
+Age, I do abhor thee, youth, I do adore thee. | William Shakespeare, *The Passionate Pilgrim*
+
+When forty winters shall besiegfe thy brow, And dig deep trenches in thy beauty's field. | William Shakespeare, *Sonnet 2*
+If I could write the beauty of your eyes And in fresh numbers number all your graces, The age to come would say, 'This poet lies...' | William Shakespeare, *Sonnet 17*
+Shall I compare thee to a Summer's day? Thou art more lovely and more temperate. | William Shakespeare, *Sonnet 18*
+For thy sweet love remebered such wealth brings That then I scorn to change my state with kings. | William Shakespeare, *Sonnet 29*
+Why didst thou promise such a beauteous day, And make me travel forth without my cloak? | William Shakespeare, *Sonnet 34*
+Time doth transfix the flourish set on youth And delves the parallels in beauty's brow. | William Shakespeare, *Sonnet 60*
+This thou perceivest which makes thy love more strong, To love that well which thou must leave ere long. | William Shakespeare, *Sonnet 73*
+Lilies that fester smell far worse than weeds. | William Shakespeare, *Sonnet 94*
+If this be error, and upon me proved, I never writ, nor no man ever loved. | William Shakespeare, *Sonnet 116*
+My mistress' eyes are nothing like the sun; Coral is far more red than her lips' red... | William Shakespeare, *Sonnet 130*
+When my love swears that she is made of truth, I do believe her, though I know she lies. | William Shakespeare, *Sonnet 138*
+
+Hunting he loved, but love he laughed to scorn. | William Shakespeare, *Venus and Adonis*
+Love is a spirit all compact of fire, Not gross to sink but light and will aspire. | William Shakespeare, *Venus and Adonis*
+
+Blest be the man that spares these stones, And curst be he that moves my bones. | William Shakespeare, *Epitaph, on his tomb at Stratford-on-Avon*
 
 
