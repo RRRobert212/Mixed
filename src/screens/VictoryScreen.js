@@ -4,7 +4,8 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, Modal }
 
 const { width } = Dimensions.get('window');
 
-export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed, performance, onClose, onGoHome }) {
+export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed, performance, onClose, onGoHome, params }) {
+
   const [visible, setVisible] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -79,7 +80,9 @@ export default function VictoryScreen({ fullQuote, quoteAttribution, guessesUsed
           <Text style={styles.stats}>Guesses Used: {guessesUsed}</Text>
 
           <TouchableOpacity style={styles.button} onPress={handleGoHome}>
-            <Text style={styles.buttonText}>Back to Home</Text>
+            <Text style={styles.buttonText}>
+              {params.mode === 'pack' ? 'Back to Pack' : 'Back to Home'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Text style={styles.closeButtonText}>×</Text>

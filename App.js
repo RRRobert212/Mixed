@@ -41,7 +41,16 @@ export default function App() {
             {(props) => <GameScreen {...props} />}
           </Stack.Screen>
 
-          <Stack.Screen name="PackDetail" component={PackDetailScreen} />
+          <Stack.Screen
+            name="PackDetail"
+            component={PackDetailScreen}
+            options={{
+              title: 'Puzzle Pack',
+              headerStyle: { backgroundColor: '#fffae9' },
+              headerTitleStyle: { fontWeight: '500', fontSize: 20 },
+              headerTitleAlign: 'center',  
+            }}
+          />
 
 
           <Stack.Screen name="Settings" component={SettingsScreen} />

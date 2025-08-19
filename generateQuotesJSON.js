@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const input = fs.readFileSync('quotes-shakespeare-tragedies-raw.txt', 'utf-8');
+const input = fs.readFileSync('quotes-shakespeare-comedies-raw.txt', 'utf-8');
 
 const quotes = input
   .split('\n')
@@ -18,7 +18,7 @@ const quotes = input
   .sort((a, b) => a.words.length - b.words.length); // sort by number of words
 
 fs.writeFileSync(
-  'assets/quotes-shakespeare-tragedies.json',
+  'assets/quote-packs/quotes-shakespeare-comedies.json',
   JSON.stringify(quotes, null, 2)
 );
 

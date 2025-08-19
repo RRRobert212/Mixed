@@ -371,11 +371,18 @@ const handleSubmit = useCallback(() => {
           quoteAttribution={finalStats.quoteAttribution}
           guessesUsed={finalStats.guessesUsed}
           performance={finalStats.performance}
+          params={params}              // <-- pass params here
           onClose={() => {
             setFinalStats(null);
             setShowVictoryScreen(false);
           }}
-          onGoHome={() => navigation.navigate('Home')}
+          onGoHome={() => {
+            if (params.mode === 'pack' && params.packId) {
+              navigation.navigate('PackDetail', { packId: params.packId });
+            } else {
+              navigation.navigate('Home');
+            }
+          }}
         />
       )}
     </View>

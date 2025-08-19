@@ -5,7 +5,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { PUZZLE_PACKS } from '../utils/packs';
 
 const { width } = Dimensions.get('window');
-const QUOTES_PER_PAGE = 42;
+const QUOTES_PER_PAGE = 40;
 
 export default function PackDetailScreen() {
   const route = useRoute();
@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
+    fontFamily: 'serif',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quoteButton: {
-    backgroundColor: '#959ce1',
+    backgroundColor: '#d2d8ffff',
     width: 60,
     height: 60,
     margin: 6,
@@ -99,8 +100,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
-    color: '#fff',
+    color: '#000000ff',
   },
 });

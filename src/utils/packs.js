@@ -3,7 +3,7 @@
 export const PUZZLE_PACKS = [
   {
     id: 'shakespeare-tragedies',
-    title: 'Shakespeare\' Tragedies',
+    title: 'Shakespeare\'s Tragedies',
     quoteFile: require('../../assets/quote-packs/quotes-shakespeare-tragedies.json'),
   },
   {
@@ -15,5 +15,10 @@ export const PUZZLE_PACKS = [
     id: 'englishlit',
     title: 'English Literature',
     quoteFile: require('../../assets/quote-packs/englishlit.json'),
+  },
+  {
+    id: 'shakespeare-comedies',
+    title: 'Shakespeare\'s Comedies',
+    quoteFile: require('../../assets/quote-packs/quotes-shakespeare-comedies.json'),
   },
 ];
