@@ -9,6 +9,8 @@ import HeaderHomeScreen from './src/components/HeaderHomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SettingsScreen from './src/screens/SettingsScreen';
 import InfoScreen from './src/screens/InfoScreen';
+import PackDetailScreen from './src/screens/PackDetailScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,9 @@ export default function App() {
           >
             {(props) => <GameScreen {...props} />}
           </Stack.Screen>
+
+          <Stack.Screen name="PackDetail" component={PackDetailScreen} />
+
 
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Info" component={InfoScreen} />

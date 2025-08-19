@@ -21,8 +21,9 @@ export default function HomeScreen() {
   };
 
   const handlePlayPack = (packId) => {
-    navigation.navigate('Game', {newGame: true}, { mode: 'pack', packId });
+    navigation.navigate('PackDetail', { packId });
   };
+
 
   const handlePastQuotes = () => {
     navigation.navigate('PastQuotes');

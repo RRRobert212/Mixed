@@ -21,6 +21,10 @@ import SubmitButton from '../components/SubmitButton';
 import ConnectionLines from '../components/ConnectionLines';
 import VictoryScreen from '../screens/VictoryScreen';
 
+import { PUZZLE_PACKS } from '../utils/packs';
+import { useRoute } from '@react-navigation/native';
+
+
 export default function GameScreen( {navigation}) {
   const [wordPositions, setWordPositions] = useState([]);
   const [spawnedWords, setSpawnedWords] = useState(0);
@@ -51,6 +55,9 @@ export default function GameScreen( {navigation}) {
     ? submitText        // animated "Congratulations!" after win
     : `Submit (${remainingSubmits})`;
   const submitScale = useRef(new Animated.Value(1)).current;
+
+  const route = useRoute();
+  const params = route.params || {};
 
 
 
@@ -101,30 +108,41 @@ export default function GameScreen( {navigation}) {
     initializeGame();
   }, []);
 
-  const initializeGame = useCallback(() => {
-    const quote = getRandomQuote();
-    setCurrentQuote(quote);
+    const initializeGame = useCallback(() => {
+      let quote;
 
-    const targetPositions = generateSpawnPositions(quote.words);
-    const spawnOrder = generateSpawnOrder(quote.words.length);
-    const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
+      if (params?.mode === 'pack' && params?.packId && params?.quoteIndex !== undefined) {
+        const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
+        quote = pack?.quoteFile?.[params.quoteIndex];
+      }
 
-    setWordPositions(initialPositions);
-    setSpawnedWords(0);
-    setIsSpawning(true);
-    setShowText(false);
-    textOpacity.setValue(0);
+      if (!quote) {
+        quote = getRandomQuote(); // fallback for daily/random
+      }
 
-    setRemainingSubmits(MAX_SUBMITS);
-    setConnections([]);
-    setPersistentConnections([]);
+      setCurrentQuote(quote);
 
-    setHasWon(false);
-    setFinalStats(null);
-    setShowVictoryScreen(false);
+      const targetPositions = generateSpawnPositions(quote.words);
+      const spawnOrder = generateSpawnOrder(quote.words.length);
+      const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
 
-    startSpawning(quote.words.length);
-  }, []);
+      setWordPositions(initialPositions);
+      setSpawnedWords(0);
+      setIsSpawning(true);
+      setShowText(false);
+      textOpacity.setValue(0);
+
+      setRemainingSubmits(MAX_SUBMITS);
+      setConnections([]);
+      setPersistentConnections([]);
+
+      setHasWon(false);
+      setFinalStats(null);
+      setShowVictoryScreen(false);
+
+      startSpawning(quote.words.length);
+    }, [params]);
+
 
   const startSpawning = useCallback((wordCount) => {
     const spawnInterval = setInterval(() => {
