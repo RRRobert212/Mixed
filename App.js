@@ -10,6 +10,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SettingsScreen from './src/screens/SettingsScreen';
 import InfoScreen from './src/screens/InfoScreen';
 import PackDetailScreen from './src/screens/PackDetailScreen';
+import { TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const Stack = createNativeStackNavigator();
@@ -44,13 +46,22 @@ export default function App() {
           <Stack.Screen
             name="PackDetail"
             component={PackDetailScreen}
-            options={{
+            options={({ navigation }) => ({
               title: 'Puzzle Pack',
               headerStyle: { backgroundColor: '#fffae9' },
-              headerTitleStyle: { fontWeight: '500', fontSize: 20 },
-              headerTitleAlign: 'center',  
-            }}
+              headerTitleStyle: { fontWeight: 'bold', fontSize: 20 },
+              headerTitleAlign: 'center',
+              headerLeft: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Home')}
+                  style={{ marginLeft: 16 }}
+                >
+                  <Ionicons name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              ),
+            })}
           />
+
 
 
           <Stack.Screen name="Settings" component={SettingsScreen} />

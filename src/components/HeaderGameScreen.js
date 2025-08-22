@@ -8,8 +8,8 @@ export default function HeaderGameScreen({ navigation }) {
     <View style={styles.header}>
       {/* Back button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('Home')} 
-        style={[styles.backButton, {padding: 12}]}
+        onPress={() => navigation.goBack()}
+        style={[styles.backButton, { padding: 12 }]}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
