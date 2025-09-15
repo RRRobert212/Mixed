@@ -23,7 +23,7 @@ export default function useDoubleTap({ locked, onUnlock }) {
     } else {
       tapTimeoutRef.current = setTimeout(() => {
         tapTimeoutRef.current = null;
-        // Could handle single tap logic here if needed
+        
       }, 300);
     }
     lastTapRef.current = now;

@@ -37,7 +37,9 @@ export function evaluateWordPositions(positions, correctList, layout) {
       word === actualWordA &&
       correctList[idx + 1] === actualWordB &&
       !connectedPairs.some(([from, to]) =>
-        sorted[from].word === actualWordA && sorted[to].word === actualWordB)
+        from === sorted[i].index && to === sorted[i + 1].index
+      )
+
     );
 
     if (matchIndex !== -1) {
@@ -49,9 +51,13 @@ export function evaluateWordPositions(positions, correctList, layout) {
         updated[sorted[i + 1].index].adjacentToCorrect = true;
       }
 
+      console.log("pair", sorted[i].word, sorted[i+1].word, sorted[i].index, sorted[i+1].index);
+
       connectedPairs.push([sorted[i].index, sorted[i + 1].index]);
     }
   }
+
+  
 
   return { updatedPositions: updated, connectedPairs };
 }

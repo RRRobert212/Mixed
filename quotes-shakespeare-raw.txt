@@ -57,7 +57,7 @@ When that his body did contain a spirit, A kingdom for it was too small a bound.
 
 He hath eaten me out of house and home. | William Shakespeare, *King Henry IV Part II*
 Uneasy lies the head that wears a crown. | William Shakespeare, *King Henry IV Part II*
-A man cannor make him laugh; but that's no marvel; he drinks no wine. | William Shakespeare, *King Henry IV Part II*
+A man cannot make him laugh; but that's no marvel; he drinks no wine. | William Shakespeare, *King Henry IV Part II*
 
 Trust none; For oaths are straws, men's faiths are wafer-cakes... | William Shakespeare, *King Henry V*
 Once more unto the breach, dear friends, once more... | William Shakespeare, *King Henry V*
@@ -77,7 +77,7 @@ Live how we can, yet die we must. | William Shakespeare, *King Henry VI Part III
 Down, down to hell; and say I sent thee thither. | William Shakespeare, *King Henry VI Part III*
 
 If I chance to talk a little wild, forgive me; I had it from my father | William Shakespeare, *King Henry VIII*
-Love theyself last: cherish those hearts that hate thee... | William Shakespeare, *King Henry VIII*
+Love thyself last: cherish those hearts that hate thee... | William Shakespeare, *King Henry VIII*
 His promises were, as he then was, mighty; But his performance, as he is now, nothing. | William Shakespeare, *King Henry VIII*
 
 Life is as tedious as a twice-told tale, Vexing the dull ear of a drowsy man. | William Shakespeare, *King John*
@@ -136,7 +136,7 @@ He doth nothing but talk of his horse. | William Shakespeare, *The Merchant of V
 Ships are but boards, sailors but men; there be land-rats and water-rats, land-thieves and water-thieves. | William Shakespeare, *The Merchant of Venice*
 But love is blind, and lovers cannot see The pretty follies that they themselves commit. | William Shakespeare, *The Merchant of Venice*
 The quality of mercy is not strained, It droppeth as the gentle rain from heaven. | William Shakespeare, *The Merchant of Venice*
-It blesseth him that gives and him that takes: 'Tis mighties in the mightiest... | William Shakespeare, *The Merchant of Venice*
+It blesseth him that gives and him that takes: 'Tis mightiest in the mightiest... | William Shakespeare, *The Merchant of Venice*
 Though justice be thy plea, consider this, That in the course of justice none of us Should see salvation... | William Shakespeare, *The Merchant of Venice*
 Wrest once the law to your authority: To do a great right, do a little wrong. | William Shakespeare, *The Merchant of Venice*
 Thou shalt have justice, more than thou desires it. | William Shakespeare, *The Merchant of Venice*
@@ -153,7 +153,7 @@ Sir, you are one of those that will not serve God if the devil bid you. | Willia
 To mourn mischief that is past and gone Is the next way to draw new mischief on. | William Shakespeare, *Othello*
 The robbed that smiles steals something from the thief. | William Shakespeare, *Othello*
 'Tis pride that pulls the country down. | William Shakespeare, *Othello*
-He is a soldier fir to stand by Caeser And give direction. | William Shakespeare, *Othello*
+He is a soldier fit to stand by Caeser And give direction. | William Shakespeare, *Othello*
 I have lost my reputation. I have lost the immortal part of myself, and what remains is bestial. | William Shakespeare, *Othello*
 How poor are they that have not patience! What wound did ever heal but by degrees? | William Shakespeare, *Othello*
 I humbly do beseech you of your pardon For too much loving you. | William Shakespeare, *Othello*
@@ -202,7 +202,7 @@ We are such stuff As dreams are made on, and our little life Is rounded with a s
 Nothing emboldens sin so much as mercy. | William Shakespeare, *Timon of Athens*
 Tis not enough to help the feeble up, But to support him after. | William Shakespeare, *Timon of Athens*
 
-The eagle suffers little birds to sing, And is not careful what they mean therevy. | William Shakespeare, *Titus Andronicus*
+The eagle suffers little birds to sing, And is not careful what they mean thereby. | William Shakespeare, *Titus Andronicus*
 
 Men prize the thing ungain'd more than it is. | William Shakespeare, *Trolius and Cressida*
 
@@ -221,7 +221,7 @@ Though I am not naturally honest, I am so sometimes by chance. | William Shakesp
 Crabbed age and youth cannot live together: Youth is full of pleasance, age is full of care. | William Shakespeare, *The Passionate Pilgrim*
 Age, I do abhor thee, youth, I do adore thee. | William Shakespeare, *The Passionate Pilgrim*
 
-When forty winters shall besiegfe thy brow, And dig deep trenches in thy beauty's field. | William Shakespeare, *Sonnet 2*
+When forty winters shall besiege thy brow, And dig deep trenches in thy beauty's field. | William Shakespeare, *Sonnet 2*
 If I could write the beauty of your eyes And in fresh numbers number all your graces, The age to come would say, 'This poet lies...' | William Shakespeare, *Sonnet 17*
 Shall I compare thee to a Summer's day? Thou art more lovely and more temperate. | William Shakespeare, *Sonnet 18*
 For thy sweet love remebered such wealth brings That then I scorn to change my state with kings. | William Shakespeare, *Sonnet 29*
