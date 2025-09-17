@@ -51,8 +51,6 @@ export function evaluateWordPositions(positions, correctList, layout) {
         updated[sorted[i + 1].index].adjacentToCorrect = true;
       }
 
-      console.log("pair", sorted[i].word, sorted[i+1].word, sorted[i].index, sorted[i+1].index);
-
       connectedPairs.push([sorted[i].index, sorted[i + 1].index]);
     }
   }
