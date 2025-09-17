@@ -11,6 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 import { PUZZLE_PACKS } from '../utils/packs';
 import { Ionicons } from '@expo/vector-icons'; // or from 'react-native-vector-icons/Ionicons'
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 const STREAK_COUNT = 3; // Dynamically calculate in future
 
 export default function HomeScreen() {
@@ -36,6 +39,18 @@ export default function HomeScreen() {
   const handleSettings = () => {
     navigation.navigate('Settings');
   };
+
+  const handleResetGuesses = async () => {
+  try {
+    // This will clear all saved guesses and progress
+    await AsyncStorage.clear();
+    alert('All guesses reset!');
+  } catch (e) {
+    console.error('Failed to reset guesses', e);
+    alert('Failed to reset guesses');
+  }
+};
+
 
   return (
     <ScrollView style={styles.container}>
@@ -79,10 +94,26 @@ export default function HomeScreen() {
             <Text style={styles.packTitle}>{pack.title}</Text>
           </TouchableOpacity>
         ))}
+
+    <TouchableOpacity 
+      style={{
+        backgroundColor: '#ff6b6b',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 20,
+        alignItems: 'center',
+      }}
+      onPress={handleResetGuesses}
+    >
+      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+        Reset All Guesses
+      </Text>
+    </TouchableOpacity>
       </ScrollView>
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

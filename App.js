@@ -11,8 +11,7 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import InfoScreen from './src/screens/InfoScreen';
 import PackDetailScreen from './src/screens/PackDetailScreen';
 import { TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
+import { ChevronLeft } from 'lucide-react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,7 +27,6 @@ export default function App() {
               header: () => <HeaderHomeScreen navigation={navigation} />,
             })}
           />
-
           <Stack.Screen
             name="Game"
             options={({ navigation }) => ({
@@ -42,7 +40,6 @@ export default function App() {
           >
             {(props) => <GameScreen {...props} />}
           </Stack.Screen>
-
           <Stack.Screen
             name="PackDetail"
             component={PackDetailScreen}
@@ -54,16 +51,13 @@ export default function App() {
               headerLeft: () => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Home')}
-                  style={{ marginLeft: 16 }}
+                  style={{ marginLeft: 16, padding: 4 }}
                 >
-                  <Ionicons name="arrow-back" size={24} color="black" />
+                  <ChevronLeft size={24} color="black" />
                 </TouchableOpacity>
               ),
             })}
           />
-
-
-
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Info" component={InfoScreen} />
         </Stack.Navigator>

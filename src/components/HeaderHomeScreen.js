@@ -1,18 +1,18 @@
 // src/components/HeaderHomeScreen.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // or 'react-native-vector-icons/Ionicons'
+import { Info, Settings } from 'lucide-react-native';
 
 export default function HeaderHomeScreen({ navigation }) {
   return (
     <View style={styles.header}>
       <Text style={styles.title}>Title</Text>
       <View style={styles.icons}>
-        <TouchableOpacity onPress={() => navigation.navigate('Info')}>
-          <Ionicons name="information-circle-outline" size={24} color="black" />
+        <TouchableOpacity onPress={() => navigation.navigate('Info')} style={styles.iconButton}>
+          <Info size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.icon}>
-          <Ionicons name="settings-outline" size={24} color="black" />
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={[styles.icon, styles.iconButton]}>
+          <Settings size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>
@@ -48,5 +48,8 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 5,
+  },
+  iconButton: {
+    padding: 4,
   },
 });

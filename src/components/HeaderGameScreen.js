@@ -1,7 +1,7 @@
 // src/components/HeaderGameScreen.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronLeft, Info, Settings } from 'lucide-react-native';
 
 export default function HeaderGameScreen({ navigation }) {
   return (
@@ -11,19 +11,19 @@ export default function HeaderGameScreen({ navigation }) {
         onPress={() => navigation.goBack()}
         style={[styles.backButton, { padding: 12 }]}
       >
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <ChevronLeft size={24} color="black" />
       </TouchableOpacity>
-
+      
       {/* Title */}
       <Text style={styles.title}>Title</Text>
-
+      
       {/* Info and Settings icons */}
       <View style={styles.icons}>
         <TouchableOpacity onPress={() => navigation.navigate('Info')}>
-          <Ionicons name="information-circle-outline" size={24} color="black" />
+          <Info size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.icon}>
-          <Ionicons name="settings-outline" size={24} color="black" />
+          <Settings size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>

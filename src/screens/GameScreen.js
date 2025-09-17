@@ -24,7 +24,7 @@ import VictoryScreen from '../screens/VictoryScreen';
 import { PUZZLE_PACKS } from '../utils/packs';
 import { useRoute } from '@react-navigation/native';
 
-import { test } from '../utils/ProgressStorage';
+import { loadProgress, updateLevelProgress } from '../utils/ProgressStorage';
 
 export default function GameScreen( {navigation}) {
   const [wordPositions, setWordPositions] = useState([]);
@@ -107,53 +107,57 @@ export default function GameScreen( {navigation}) {
 
   useEffect(() => {
     initializeGame();
-
-    //test function, DELETE SOON
-    const runTest = async () => {
-    try {
-      await test();
-    } catch (e) {
-      console.error('Progress test failed', e);
-    }
-  };
-
-  runTest();
   }, []);
 
-    const initializeGame = useCallback(() => {
-      let quote;
+const levelKeyRef = useRef(null); // store dynamic level key across functions
 
-      if (params?.mode === 'pack' && params?.packId && params?.quoteIndex !== undefined) {
-        const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
-        quote = pack?.quoteFile?.[params.quoteIndex];
-      }
+const initializeGame = useCallback(async () => {
+  let quote;
 
-      if (!quote) {
-        quote = getRandomQuote(); // fallback for daily/random
-      }
+  // get quote for pack or fallback to daily/random
+  if (params?.mode && params?.quoteIndex !== undefined && params?.packId) {
+    const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
+    quote = pack?.quoteFile?.[params.quoteIndex];
+  }
 
-      setCurrentQuote(quote);
+  if (!quote) {
+    quote = getRandomQuote();
+  }
 
-      const targetPositions = generateSpawnPositions(quote.words);
-      const spawnOrder = generateSpawnOrder(quote.words.length);
-      const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
+  setCurrentQuote(quote);
 
-      setWordPositions(initialPositions);
-      setSpawnedWords(0);
-      setIsSpawning(true);
-      setShowText(false);
-      textOpacity.setValue(0);
+  // generate word positions
+  const targetPositions = generateSpawnPositions(quote.words);
+  const spawnOrder = generateSpawnOrder(quote.words.length);
+  const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
+  setWordPositions(initialPositions);
 
-      setRemainingSubmits(MAX_SUBMITS);
-      setConnections([]);
-      setPersistentConnections([]);
+  // compute and store levelKey
+  levelKeyRef.current = params.mode && params.quoteIndex !== undefined
+    ? `${params.mode}_${params.quoteIndex}`
+    : `daily_${params.date || 'today'}`;
 
-      setHasWon(false);
-      setFinalStats(null);
-      setShowVictoryScreen(false);
+  // load saved progress for this level
+  const progress = await loadProgress();
+  const packId = params?.packId || 'daily'; // fallback for non-pack/daily mode
+  const levelData = progress.packs?.[packId]?.[levelKeyRef.current];
+  setRemainingSubmits(levelData?.guessesRemaining ?? MAX_SUBMITS);
 
-      startSpawning(quote.words.length);
-    }, [params]);
+  // reset other state
+  setSpawnedWords(0);
+  setIsSpawning(true);
+  setShowText(false);
+  textOpacity.setValue(0);
+  setConnections([]);
+  setPersistentConnections([]);
+  setHasWon(false);
+  setFinalStats(null);
+  setShowVictoryScreen(false);
+  setSubmitLocked(true);
+
+  // start spawning words
+  startSpawning(quote.words.length);
+}, [params]);
 
 
   const startSpawning = useCallback((wordCount) => {
@@ -197,13 +201,19 @@ export default function GameScreen( {navigation}) {
   }, [wordPositions]);
 
 const handleSubmit = useCallback(() => {
-  if (submitLocked) {
-    triggerLockedMessage();
+  if (submitLocked || remainingSubmits <= 0) {
+
+    //user tries to press submit with no guesses left, perhaps trigger some message.
     return;
   }
 
   const nextRemaining = remainingSubmits - 1;
   setRemainingSubmits(nextRemaining);
+
+  if (levelKeyRef.current) {
+    const packId = params?.packId || 'daily';
+    updateLevelProgress(packId, levelKeyRef.current, { guessesRemaining: nextRemaining });
+  }
 
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer, currentQuote.words);
