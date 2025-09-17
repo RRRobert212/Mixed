@@ -24,6 +24,7 @@ import VictoryScreen from '../screens/VictoryScreen';
 import { PUZZLE_PACKS } from '../utils/packs';
 import { useRoute } from '@react-navigation/native';
 
+import { test } from '../utils/ProgressStorage';
 
 export default function GameScreen( {navigation}) {
   const [wordPositions, setWordPositions] = useState([]);
@@ -106,6 +107,17 @@ export default function GameScreen( {navigation}) {
 
   useEffect(() => {
     initializeGame();
+
+    //test function, DELETE SOON
+    const runTest = async () => {
+    try {
+      await test();
+    } catch (e) {
+      console.error('Progress test failed', e);
+    }
+  };
+
+  runTest();
   }, []);
 
     const initializeGame = useCallback(() => {
