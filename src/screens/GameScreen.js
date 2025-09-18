@@ -26,7 +26,7 @@ import { useRoute } from '@react-navigation/native';
 
 import { loadProgress, updateLevelProgress } from '../utils/ProgressStorage';
 
-export default function GameScreen( {navigation}) {
+export default function GameScreen({ navigation }) {
   const [wordPositions, setWordPositions] = useState([]);
   const [spawnedWords, setSpawnedWords] = useState(0);
   const [isSpawning, setIsSpawning] = useState(true);
@@ -48,19 +48,15 @@ export default function GameScreen( {navigation}) {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
 
-  //submitbutton is locked at start, unlocks after spawn
   const [submitLocked, setSubmitLocked] = useState(true);
   const [submitText, setSubmitText] = useState(`Submit (${remainingSubmits})`);
-
-  const currentSubmitText = hasWon 
-    ? submitText        // animated "Congratulations!" after win
-    : `Submit (${remainingSubmits})`;
+  const currentSubmitText = hasWon ? submitText : `Submit (${remainingSubmits})`;
   const submitScale = useRef(new Animated.Value(1)).current;
 
   const route = useRoute();
   const params = route.params || {};
 
-
+  const levelKeyRef = useRef(null); // store dynamic level key across functions
 
   const updatePosition = useCallback((index, newX, newY, boxSize) => {
     setWordPositions(currentPositions => {
@@ -109,56 +105,45 @@ export default function GameScreen( {navigation}) {
     initializeGame();
   }, []);
 
-const levelKeyRef = useRef(null); // store dynamic level key across functions
+  const initializeGame = useCallback(async () => {
+    let quote;
 
-const initializeGame = useCallback(async () => {
-  let quote;
+    if (params?.mode && params?.quoteIndex !== undefined && params?.packId) {
+      const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
+      quote = pack?.quoteFile?.[params.quoteIndex];
+    }
 
-  // get quote for pack or fallback to daily/random
-  if (params?.mode && params?.quoteIndex !== undefined && params?.packId) {
-    const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
-    quote = pack?.quoteFile?.[params.quoteIndex];
-  }
+    if (!quote) quote = getRandomQuote();
 
-  if (!quote) {
-    quote = getRandomQuote();
-  }
+    setCurrentQuote(quote);
 
-  setCurrentQuote(quote);
+    const targetPositions = generateSpawnPositions(quote.words);
+    const spawnOrder = generateSpawnOrder(quote.words.length);
+    const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
+    setWordPositions(initialPositions);
 
-  // generate word positions
-  const targetPositions = generateSpawnPositions(quote.words);
-  const spawnOrder = generateSpawnOrder(quote.words.length);
-  const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
-  setWordPositions(initialPositions);
+    levelKeyRef.current = params.mode && params?.quoteIndex !== undefined
+      ? `${params.mode}_${params.quoteIndex}`
+      : `daily_${params.date || 'today'}`;
 
-  // compute and store levelKey
-  levelKeyRef.current = params.mode && params.quoteIndex !== undefined
-    ? `${params.mode}_${params.quoteIndex}`
-    : `daily_${params.date || 'today'}`;
+    const progress = await loadProgress();
+    const packId = params?.packId || 'daily';
+    const levelData = progress.packs?.[packId]?.[levelKeyRef.current];
+    setRemainingSubmits(levelData?.guessesRemaining ?? MAX_SUBMITS);
 
-  // load saved progress for this level
-  const progress = await loadProgress();
-  const packId = params?.packId || 'daily'; // fallback for non-pack/daily mode
-  const levelData = progress.packs?.[packId]?.[levelKeyRef.current];
-  setRemainingSubmits(levelData?.guessesRemaining ?? MAX_SUBMITS);
+    setSpawnedWords(0);
+    setIsSpawning(true);
+    setShowText(false);
+    textOpacity.setValue(0);
+    setConnections([]);
+    setPersistentConnections([]);
+    setHasWon(false);
+    setFinalStats(null);
+    setShowVictoryScreen(false);
+    setSubmitLocked(true);
 
-  // reset other state
-  setSpawnedWords(0);
-  setIsSpawning(true);
-  setShowText(false);
-  textOpacity.setValue(0);
-  setConnections([]);
-  setPersistentConnections([]);
-  setHasWon(false);
-  setFinalStats(null);
-  setShowVictoryScreen(false);
-  setSubmitLocked(true);
-
-  // start spawning words
-  startSpawning(quote.words.length);
-}, [params]);
-
+    startSpawning(quote.words.length);
+  }, [params]);
 
   const startSpawning = useCallback((wordCount) => {
     const spawnInterval = setInterval(() => {
@@ -168,11 +153,7 @@ const initializeGame = useCallback(async () => {
           clearInterval(spawnInterval);
           setIsSpawning(false);
           setHasStarted(true);
-
-          setTimeout(() => {
-            setSubmitLocked(false);
-          }, 1000);
-
+          setTimeout(() => setSubmitLocked(false), 1000);
           setTimeout(() => {
             setShowText(true);
             Animated.timing(textOpacity, {
@@ -199,17 +180,25 @@ const initializeGame = useCallback(async () => {
       })
       .map(p => p.word);
   }, [wordPositions]);
+// ----------- PERSISTENT QUOTE STATE HELPER -----------
+const updateQuoteState = async (status, guessesRemaining) => {
+  // status: 'not_started' | 'started' | 'completed' | 'failed'
+  const packId = params?.packId || 'daily';
+  if (!levelKeyRef.current) return;
+
+  await updateLevelProgress(packId, levelKeyRef.current, {
+    status,
+    guessesRemaining, // <-- explicitly pass the value
+  });
+};
 
 const handleSubmit = useCallback(() => {
-  if (submitLocked || remainingSubmits <= 0) {
+  if (submitLocked || remainingSubmits <= 0) return;
 
-    //user tries to press submit with no guesses left, perhaps trigger some message.
-    return;
-  }
-
-  const nextRemaining = remainingSubmits - 1;
+  const nextRemaining = Math.max(remainingSubmits - 1, 0); // only declare once
   setRemainingSubmits(nextRemaining);
 
+  // Update progress immediately
   if (levelKeyRef.current) {
     const packId = params?.packId || 'daily';
     updateLevelProgress(packId, levelKeyRef.current, { guessesRemaining: nextRemaining });
@@ -218,7 +207,6 @@ const handleSubmit = useCallback(() => {
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer, currentQuote.words);
 
-  // Evaluate positions and get connections
   const { updatedPositions, connectedPairs } = evaluateWordPositions(
     wordPositions,
     currentQuote.words,
@@ -227,12 +215,10 @@ const handleSubmit = useCallback(() => {
   setWordPositions(updatedPositions);
   setConnections(connectedPairs);
 
-  // Merge new connections into persistentConnections
   setPersistentConnections(prev => {
     const hasInbound = new Set(prev.map(pair => pair[1]));
     const hasOutbound = new Set(prev.map(pair => pair[0]));
     const newOnes = [];
-
     for (const [from, to] of connectedPairs) {
       if (hasOutbound.has(from) || hasInbound.has(to)) continue;
       if (prev.some(([a, b]) => a === from && b === to)) continue;
@@ -240,31 +226,33 @@ const handleSubmit = useCallback(() => {
       hasOutbound.add(from);
       hasInbound.add(to);
     }
-
     return [...prev, ...newOnes];
   });
 
+  // --------- UPDATE QUOTE STATE ----------
   if (isCorrect) {
-    // Victory logic
-    setSubmitLocked(true);
+    updateQuoteState('completed', nextRemaining);
+  } else if (nextRemaining === 0) {
+    updateQuoteState('failed', nextRemaining); // persist 0 guesses
+  } else {
+    updateQuoteState('started', nextRemaining);
+  }
 
-    const guessesUsed = MAX_SUBMITS - remainingSubmits + 1;
+  if (isCorrect) {
+    setSubmitLocked(true);
+    const guessesUsed = MAX_SUBMITS - nextRemaining;
     const performance =
       guessesUsed === 1 ? 'Perfect!' :
       guessesUsed <= 2 ? 'Excellent!' :
       guessesUsed <= 3 ? 'Good!' :
       'A win is a win...';
-
     setFinalStats({
       fullQuote: currentQuote.words.join(' '),
       quoteAttribution: currentQuote.attribution,
       guessesUsed,
       performance,
     });
-
     setHasWon(true);
-
-    // Animate submit button and show victory screen
     setTimeout(() => {
       Animated.timing(submitScale, {
         toValue: 0,
@@ -281,23 +269,12 @@ const handleSubmit = useCallback(() => {
         }).start();
       });
     }, 150);
-
     setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1700);
-  } else {
-    // Wrong answer → hint feedback
-    setTimeout(() => {
-      // positions and connections already updated above
-    }, 150);
-
-    // Lock submit if no guesses left
-    if (nextRemaining <= 0) {
-      console.log("OUT OF GUESSES");
-      setSubmitLocked(true);
-      // Optionally show failure screen here
-    }
+  } else if (nextRemaining <= 0) {
+    setSubmitLocked(true);
   }
-}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, submitLocked]);
 
+}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, submitLocked]);
 
 
   const handleUnlock = useCallback((index) => {
