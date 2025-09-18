@@ -56,12 +56,9 @@ public domain books:
 
 https://en.wikipedia.org/wiki/2022_in_public_domain
 
-<<<<<<< HEAD
-editing for test
-=======
 
 one or two or three free puzzle packs and the rest are paid.
 make it say quotes on the homepage like in the premium pitch
 
-TO DO, DO THE THING IN CHATGPT TO FIX ANIMATION SLOWNESS
->>>>>>> homescreen
+IF I GET RID OF LOCKING THEN THE LACK OF POSITION PERSISTENCE ISN'T THAT BAD. YOU STILL GET INFO WHEN YOU RENTER THE puzzle,
+IT'S JUST A LITTLE UGLY.

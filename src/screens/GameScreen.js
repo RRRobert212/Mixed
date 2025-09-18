@@ -105,32 +105,59 @@ export default function GameScreen({ navigation }) {
     initializeGame();
   }, []);
 
-  const initializeGame = useCallback(async () => {
-    let quote;
+const initializeGame = useCallback(async () => {
+  let quote;
+  if (params?.mode && params?.quoteIndex !== undefined && params?.packId) {
+    const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
+    quote = pack?.quoteFile?.[params.quoteIndex];
+  }
+  if (!quote) quote = getRandomQuote();
+  setCurrentQuote(quote);
 
-    if (params?.mode && params?.quoteIndex !== undefined && params?.packId) {
-      const pack = PUZZLE_PACKS.find(p => p.id === params.packId);
-      quote = pack?.quoteFile?.[params.quoteIndex];
-    }
+  levelKeyRef.current = params.mode && params?.quoteIndex !== undefined
+    ? `${params.mode}_${params.quoteIndex}`
+    : `daily_${params.date || 'today'}`;
 
-    if (!quote) quote = getRandomQuote();
+  const progress = await loadProgress();
+  const packId = params?.packId || 'daily';
+  const levelData = progress.packs?.[packId]?.[levelKeyRef.current];
 
-    setCurrentQuote(quote);
+  if (levelData && levelData.status && levelData.status !== "not_started") {
+    // restore everything from storage (falling back to sensible defaults)
+    const restoredPositions = levelData.wordPositions ?? [];
+    const restoredConnections = levelData.persistentConnections ?? [];
 
+    // If stored positions are missing (older saves), generate defaults
+    const positionsToUse = (restoredPositions.length === quote.words.length)
+      ? restoredPositions
+      : createInitialPositions(generateSpawnPositions(quote.words), generateSpawnOrder(quote.words.length), quote.words);
+
+    setWordPositions(positionsToUse);
+    setPersistentConnections(restoredConnections);
+
+    setRemainingSubmits(levelData.guessesRemaining ?? MAX_SUBMITS);
+
+    // Prevent spawn animation — show words where they are
+    setSpawnedWords(quote.words.length);
+    setIsSpawning(false);
+    setHasStarted(true);
+
+    setShowText(true);
+    textOpacity.setValue(1);
+
+    // Show lock if completed or out of guesses
+    setSubmitLocked(levelData.status === "completed" || (levelData.guessesRemaining ?? MAX_SUBMITS) <= 0);
+    setConnections(restoredConnections.length ? restoredConnections : []);
+    setHasWon(levelData.status === "completed");
+    // optionally restore finalStats if you saved them earlier
+  } else {
+    // fresh puzzle: normal spawn flow
     const targetPositions = generateSpawnPositions(quote.words);
     const spawnOrder = generateSpawnOrder(quote.words.length);
     const initialPositions = createInitialPositions(targetPositions, spawnOrder, quote.words);
     setWordPositions(initialPositions);
 
-    levelKeyRef.current = params.mode && params?.quoteIndex !== undefined
-      ? `${params.mode}_${params.quoteIndex}`
-      : `daily_${params.date || 'today'}`;
-
-    const progress = await loadProgress();
-    const packId = params?.packId || 'daily';
-    const levelData = progress.packs?.[packId]?.[levelKeyRef.current];
-    setRemainingSubmits(levelData?.guessesRemaining ?? MAX_SUBMITS);
-
+    setRemainingSubmits(MAX_SUBMITS);
     setSpawnedWords(0);
     setIsSpawning(true);
     setShowText(false);
@@ -143,7 +170,10 @@ export default function GameScreen({ navigation }) {
     setSubmitLocked(true);
 
     startSpawning(quote.words.length);
-  }, [params]);
+  }
+}, [params]);
+
+
 
   const startSpawning = useCallback((wordCount) => {
     const spawnInterval = setInterval(() => {
@@ -188,37 +218,36 @@ const updateQuoteState = async (status, guessesRemaining) => {
 
   await updateLevelProgress(packId, levelKeyRef.current, {
     status,
-    guessesRemaining, // <-- explicitly pass the value
+    guessesRemaining,
+    wordPositions,         // persist current positions
+    persistentConnections, // persist drawn connections
   });
 };
 
 const handleSubmit = useCallback(() => {
   if (submitLocked || remainingSubmits <= 0) return;
 
-  const nextRemaining = Math.max(remainingSubmits - 1, 0); // only declare once
-  setRemainingSubmits(nextRemaining);
+  // compute next remaining (single source)
+  const nextRemaining = Math.max(remainingSubmits - 1, 0);
 
-  // Update progress immediately
-  if (levelKeyRef.current) {
-    const packId = params?.packId || 'daily';
-    updateLevelProgress(packId, levelKeyRef.current, { guessesRemaining: nextRemaining });
-  }
-
+  // Evaluate answer & positions
   const userAnswer = getSortedWords();
   const isCorrect = verifyOrder(userAnswer, currentQuote.words);
 
+  // Evaluate positions and get connections (returns new positions)
   const { updatedPositions, connectedPairs } = evaluateWordPositions(
     wordPositions,
     currentQuote.words,
     LAYOUT
   );
-  setWordPositions(updatedPositions);
-  setConnections(connectedPairs);
 
-  setPersistentConnections(prev => {
+  // compute merged persistent connections (deterministic)
+  const mergedPersistentConnections = (() => {
+    const prev = persistentConnections || [];
     const hasInbound = new Set(prev.map(pair => pair[1]));
     const hasOutbound = new Set(prev.map(pair => pair[0]));
     const newOnes = [];
+
     for (const [from, to] of connectedPairs) {
       if (hasOutbound.has(from) || hasInbound.has(to)) continue;
       if (prev.some(([a, b]) => a === from && b === to)) continue;
@@ -227,17 +256,29 @@ const handleSubmit = useCallback(() => {
       hasInbound.add(to);
     }
     return [...prev, ...newOnes];
-  });
+  })();
 
-  // --------- UPDATE QUOTE STATE ----------
-  if (isCorrect) {
-    updateQuoteState('completed', nextRemaining);
-  } else if (nextRemaining === 0) {
-    updateQuoteState('failed', nextRemaining); // persist 0 guesses
-  } else {
-    updateQuoteState('started', nextRemaining);
+  // Decide status to persist
+  const newStatus = isCorrect ? 'completed' : (nextRemaining === 0 ? 'failed' : 'started');
+
+  // Persist EXACT snapshot (use local variables, not stale state)
+  if (levelKeyRef.current) {
+    const packId = params?.packId || 'daily';
+    updateLevelProgress(packId, levelKeyRef.current, {
+      status: newStatus,
+      guessesRemaining: nextRemaining,
+      wordPositions: updatedPositions,
+      persistentConnections: mergedPersistentConnections,
+    });
   }
 
+  // Update UI state
+  setRemainingSubmits(nextRemaining);
+  setWordPositions(updatedPositions);
+  setConnections(connectedPairs);
+  setPersistentConnections(mergedPersistentConnections);
+
+  // Update other UI bits
   if (isCorrect) {
     setSubmitLocked(true);
     const guessesUsed = MAX_SUBMITS - nextRemaining;
@@ -254,27 +295,21 @@ const handleSubmit = useCallback(() => {
     });
     setHasWon(true);
     setTimeout(() => {
-      Animated.timing(submitScale, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        setSubmitText('Congratulations!');
-        submitScale.setValue(0.5);
-        Animated.spring(submitScale, {
-          toValue: 1,
-          friction: 15,
-          tension: 60,
-          useNativeDriver: true,
-        }).start();
-      });
+      Animated.timing(submitScale, { toValue: 0, duration: 300, useNativeDriver: true })
+        .start(() => {
+          setSubmitText('Congratulations!');
+          submitScale.setValue(0.5);
+          Animated.spring(submitScale, { toValue: 1, friction: 15, tension: 60, useNativeDriver: true }).start();
+        });
     }, 150);
     setTimeout(() => setShowVictoryScreen(true), ANIMATION.HINT_LOCK_DURATION || 1700);
   } else if (nextRemaining <= 0) {
     setSubmitLocked(true);
   }
+}, [
+  remainingSubmits, currentQuote, getSortedWords, wordPositions, persistentConnections, submitLocked, params, updateLevelProgress, submitScale,
+]);
 
-}, [remainingSubmits, currentQuote, getSortedWords, wordPositions, submitLocked]);
 
 
   const handleUnlock = useCallback((index) => {
@@ -329,22 +364,39 @@ const handleSubmit = useCallback(() => {
 
       {wordPositions.length === currentQuote.words.length &&
         currentQuote.words.map((word, index) => (
-          <DraggableWord
-            key={index}
-            word={word}
-            initialPosition={{ x: wordPositions[index].x, y: wordPositions[index].y }}
-            targetPosition={wordPositions[index].targetX !== undefined ? 
-              { x: wordPositions[index].targetX, y: wordPositions[index].targetY } : null}
-            shouldSpawn={wordPositions[index].spawnOrder < spawnedWords}
-            onDragEnd={(x, y, boxSize) => updatePosition(index, x, y, boxSize)}
-            onSpawnComplete={(finalX, finalY, boxSize) => handleSpawnComplete(index, finalX, finalY, boxSize)}
-            onUnlock={() => handleUnlock(index)}
-            isSpawning={isSpawning}
-            locked={wordPositions[index].locked}
-            onLockedAttempt={triggerLockedMessage}
-            adjacentToCorrect={wordPositions[index].adjacentToCorrect}
-            correctIndexTag={wordPositions[index].correctIndexTag}
-          />
+        <DraggableWord
+          key={index}
+          word={word}
+          // Where the word would spawn initially
+          initialPosition={{ x: wordPositions[index].x, y: wordPositions[index].y }}
+
+          // NEW: Persisted position if available
+          currentPosition={
+            wordPositions[index].currentX !== undefined && wordPositions[index].currentY !== undefined
+              ? { x: wordPositions[index].currentX, y: wordPositions[index].currentY }
+              : null
+          }
+
+          // Original target position logic (if you’re still using it)
+          targetPosition={
+            wordPositions[index].targetX !== undefined
+              ? { x: wordPositions[index].targetX, y: wordPositions[index].targetY }
+              : null
+          }
+
+          shouldSpawn={wordPositions[index].spawnOrder < spawnedWords}
+          onDragEnd={(x, y, boxSize) => updatePosition(index, x, y, boxSize)}
+          onSpawnComplete={(finalX, finalY, boxSize) =>
+            handleSpawnComplete(index, finalX, finalY, boxSize)
+          }
+          onUnlock={() => handleUnlock(index)}
+          isSpawning={isSpawning}
+          locked={wordPositions[index].locked}
+          onLockedAttempt={triggerLockedMessage}
+          adjacentToCorrect={wordPositions[index].adjacentToCorrect}
+          correctIndexTag={wordPositions[index].correctIndexTag}
+        />
+
         ))}
 
       {showLockedMessage && (
