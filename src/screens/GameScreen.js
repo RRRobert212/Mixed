@@ -352,98 +352,106 @@ const handleSubmit = useCallback(() => {
   }
 
   return (
-    <View style={styles.container}>
-      <Animated.Text style={[styles.orderText, { opacity: textOpacity }]}>
-        {getSortedWords().join(' ')}
-      </Animated.Text>
+<View style={styles.container}>
 
-      <ConnectionLines 
-        wordPositions={wordPositions}
-        connections={persistentConnections}
+  <ConnectionLines 
+    wordPositions={wordPositions}
+    connections={persistentConnections}
+  />
+
+  {wordPositions.length === currentQuote.words.length &&
+    currentQuote.words.map((word, index) => (
+      <DraggableWord
+        key={index}
+        word={word}
+        initialPosition={{ x: wordPositions[index].x, y: wordPositions[index].y }}
+        currentPosition={
+          wordPositions[index].currentX !== undefined && wordPositions[index].currentY !== undefined
+            ? { x: wordPositions[index].currentX, y: wordPositions[index].currentY }
+            : null
+        }
+        targetPosition={
+          wordPositions[index].targetX !== undefined
+            ? { x: wordPositions[index].targetX, y: wordPositions[index].targetY }
+            : null
+        }
+        shouldSpawn={wordPositions[index].spawnOrder < spawnedWords}
+        onDragEnd={(x, y, boxSize) => updatePosition(index, x, y, boxSize)}
+        onSpawnComplete={(finalX, finalY, boxSize) =>
+          handleSpawnComplete(index, finalX, finalY, boxSize)
+        }
+        onUnlock={() => handleUnlock(index)}
+        isSpawning={isSpawning}
+        locked={wordPositions[index].locked}
+        onLockedAttempt={triggerLockedMessage}
+        adjacentToCorrect={wordPositions[index].adjacentToCorrect}
+        correctIndexTag={wordPositions[index].correctIndexTag}
       />
+    ))}
 
-      {wordPositions.length === currentQuote.words.length &&
-        currentQuote.words.map((word, index) => (
-        <DraggableWord
-          key={index}
-          word={word}
-          // Where the word would spawn initially
-          initialPosition={{ x: wordPositions[index].x, y: wordPositions[index].y }}
+  {showLockedMessage && (
+    <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
+      <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
+    </Animated.View>
+  )}
 
-          // NEW: Persisted position if available
-          currentPosition={
-            wordPositions[index].currentX !== undefined && wordPositions[index].currentY !== undefined
-              ? { x: wordPositions[index].currentX, y: wordPositions[index].currentY }
-              : null
-          }
+  <View style={styles.bottomRow}>
+    <Animated.Text style={[styles.orderText, { opacity: textOpacity }]}>
+      {getSortedWords().join(' ')}
+    </Animated.Text>
 
-          // Original target position logic (if you’re still using it)
-          targetPosition={
-            wordPositions[index].targetX !== undefined
-              ? { x: wordPositions[index].targetX, y: wordPositions[index].targetY }
-              : null
-          }
+    <SubmitButton
+      onPress={handleSubmit}
+      isLocked={submitLocked}
+      text={currentSubmitText}
+      scale={submitScale}
+    />
+  </View>
 
-          shouldSpawn={wordPositions[index].spawnOrder < spawnedWords}
-          onDragEnd={(x, y, boxSize) => updatePosition(index, x, y, boxSize)}
-          onSpawnComplete={(finalX, finalY, boxSize) =>
-            handleSpawnComplete(index, finalX, finalY, boxSize)
-          }
-          onUnlock={() => handleUnlock(index)}
-          isSpawning={isSpawning}
-          locked={wordPositions[index].locked}
-          onLockedAttempt={triggerLockedMessage}
-          adjacentToCorrect={wordPositions[index].adjacentToCorrect}
-          correctIndexTag={wordPositions[index].correctIndexTag}
-        />
+  {hasWon && finalStats && showVictoryScreen && (
+    <VictoryScreen
+      fullQuote={finalStats.fullQuote}
+      quoteAttribution={finalStats.quoteAttribution}
+      guessesUsed={finalStats.guessesUsed}
+      performance={finalStats.performance}
+      params={params}
+      onClose={() => {
+        setFinalStats(null);
+        setShowVictoryScreen(false);
+      }}
+      onGoHome={() => {
+        if (params.mode === 'pack' && params.packId) {
+          navigation.navigate('PackDetail', { packId: params.packId });
+        } else {
+          navigation.navigate('Home');
+        }
+      }}
+    />
+  )}
+</View>
 
-        ))}
-
-      {showLockedMessage && (
-        <Animated.View pointerEvents="none" style={[styles.lockedMessageContainer, { opacity: lockedMessageOpacity }]}>
-          <Text style={styles.lockedMessageText}>Double tap a word to unlock it</Text>
-        </Animated.View>
-      )}
-
-
-      <View style={styles.bottomRow}>
-        <SubmitButton
-          onPress={handleSubmit}
-          isLocked={submitLocked}
-          text={currentSubmitText}
-          scale={submitScale}
-        />
-
-      </View>
-
-      {hasWon && finalStats && showVictoryScreen && (
-        <VictoryScreen
-          fullQuote={finalStats.fullQuote}
-          quoteAttribution={finalStats.quoteAttribution}
-          guessesUsed={finalStats.guessesUsed}
-          performance={finalStats.performance}
-          params={params}              // <-- pass params here
-          onClose={() => {
-            setFinalStats(null);
-            setShowVictoryScreen(false);
-          }}
-          onGoHome={() => {
-            if (params.mode === 'pack' && params.packId) {
-              navigation.navigate('PackDetail', { packId: params.packId });
-            } else {
-              navigation.navigate('Home');
-            }
-          }}
-        />
-      )}
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20,  backgroundColor: '#fffae9', },
-  orderText: { marginTop: 0, fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', color: '#333', textAlign: 'center' },
-  bottomRow: { position: 'absolute', bottom: 65, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+bottomRow: { 
+  position: 'absolute', 
+  bottom: 60, 
+  left: 0, 
+  right: 0, 
+  justifyContent: 'center', 
+  alignItems: 'center',
+  gap:14, // space between order text and button
+},
+orderText: { 
+  fontSize: 18, 
+  fontFamily: 'serif', 
+  fontStyle: 'italic', 
+  fontWeight: 'bold', 
+  color: '#333', 
+  textAlign: 'center' 
+},
   lockedMessageContainer: { position: 'absolute', top: '45%', left: '10%', right: '10%', backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: 12, borderRadius: 8, alignItems: 'center', zIndex: 100 },
   lockedMessageText: { color: '#fff', fontSize: 16, fontWeight: '500', textAlign: 'center' },
   loadingText: { fontSize: 18, textAlign: 'center', marginTop: 100, color: '#666' },
